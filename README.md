@@ -93,9 +93,60 @@ wenn ein anderer Befehl vorher eingegeben wurde.
 
 ### Turnier-Durchführung
 
+#### Teilnehmer verwalten
+
 `/t:a`  
 `/t:add <Player> [<Player> [...]]`  
 Fügt einen oder mehrere Spieler der aktiven Runde hinzu
+
+`/t:rm`
+`/t:remove <Player>`  
+Entfernt einen Spieler aus der aktiven Runde.
+
+#### Paarungen generieren
+
+`/t:p`  
+`/t:play`  
+Erzeugt eine neue Paarung zwischen zwei zufälligen Spielern.
+Wählt unter Spielern aus,
+welche während der aktuellen Runde noch in keiner Paarung vorhanden waren.
+Falls keine Spieler mehr vorhanden sind,
+so wird eine Fehlermeldung ausgegeben.
+Falls ein Spieler keinen Gegner haben würde,
+so wird darauf hingewiesen,
+dass ein Spieler hinzugefügt
+oder der letzte Spieler entfernt werden muss.
+Bei weniger als vier Spielern
+werden entsprechend die Finalrunden eingeleitet.
+Sofern bereits eine Paarung im Gange ist,
+werden aktuelle Informationen über die Paarung ausgegeben.
+
+`/t:w`  
+`/t:win <Player>`
+Setzt den Gewinner der aktuellen Paarung.
+Hierfür muss vorher `/t:play` aufgerufen worden sein,
+d.h. dass aktuell eine Paarung laufen muss.
+
+#### Runden fortschreiten
+
+`/r:next`  
+Setzt mit der nächsten Runde fort.
+Dies ist nur möglich,
+sofern alle Spieler der Runde bereits in einer Paarung waren.
+Wirft einen Fehler falls noch eine Paarung aktiv ist (`/t:play`).
+
+`/r:prev`  
+`/r:previous`  
+Geht zurück in die letzte Runde,
+falls ein Spieler nachträglich teilnehmen möchte.
+Dies ist nur möglich,
+wenn noch keine Paarung der aktuellen Runde begonnen hat.
+
+## Installation
+
+### Abhängigkeiten
+
+Diese Modifikation benötigt Fabric API Version 0.31.0 oder höher.
 
 ## Lizenz
 
