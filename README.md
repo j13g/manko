@@ -33,6 +33,9 @@ wird durch die Anzahl der übrigen Spieler bestimmt.
 Bei vier Spielern wird im K.O.-Verfahren fortgesetzt.
 Bei drei Spielern geht es im Round Robin weiter.
 
+Platzierungen gehen immer an die ersten 3 Gewinner.
+Basierend darauf wird auch das Finale ausgetragen.
+
 ## Konzepte
 
 ### Dynamisches Turnier
