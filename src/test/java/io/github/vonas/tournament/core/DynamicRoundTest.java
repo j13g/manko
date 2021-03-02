@@ -9,7 +9,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RoundTest {
+class DynamicRoundTest {
 
     private UUID[] UUIDs = {
         UUID.fromString("e229d301-2a54-421a-8e26-8aff8e3dc340"),
