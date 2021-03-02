@@ -128,6 +128,9 @@ wenn ein anderer Befehl vorher eingegeben wurde.
 `/t:a`  
 `/t:add <Player> [<Player> [...]]`  
 Fügt einen oder mehrere Spieler der aktiven Runde hinzu.
+Falls der Spieler bereits in der Runde ist passiert nichts.
+Falls dieser jedoch verloren hat und sonst nicht mehr teilnehmen würde,
+erhält der Spieler eine zweite Chance.
 
 `/t:rm`  
 `/t:remove <Player>`  
