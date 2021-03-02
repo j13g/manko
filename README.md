@@ -35,6 +35,28 @@ Bei drei Spielern geht es im Round Robin weiter.
 
 ## Konzepte
 
+### Dynamisches Turnier
+
+Ein Turnier im Sinne dieser Modifikation
+ist ein dynamisches Turnier.
+Das bedeutet, dass Spieler auch
+während der Durchführung des Turniers
+hinzugefügt werden können.
+Paarungen werden nicht im Vorhinein generiert.
+
+### Finale niemals in der ersten Runde
+
+Aufgrund der Dynamik eines Turniers
+kann es vorkommen, dass in der ersten Runde
+nicht genügend Teilnehmer vorhanden sind.
+Bei drei Teilnehmern wäre zum Beispiel zu entscheiden,
+ob diese bereits im Round Robin um die Trophäe spielen sollen,
+oder im Nachhinein noch Spieler hinzugefügt werden können.
+Diese Modifikation nimmt an,
+dass die erste Runde niemals das Finale ist.
+
+### Speicherung von Zustandsdaten
+
 Daten werden in einer SQLite-Datenbank gespeichert.
 Neben des strukturierten Formats profitiert man
 von einer persistenten Speicherung der Daten
@@ -46,10 +68,6 @@ keine Zustandsdaten im Hauptspeicher.
 Jeder Befehl nimmt sich die Daten aus der Datenbank,
 welcher er benötigt, macht seine Arbeit
 und speichert den neuen Zustand direkt im Anschluss ab.
-
-Die Befehle sind so gestaltet,
-dass sie sich in ihrer Form einer REPL ähneln
-(Read-Eval-Print-Loop).
 
 ## Befehle
 
@@ -85,8 +103,8 @@ das Turnier manuell forgesetzt werden kann.
 `/t:yes`  
 Bestätigt eine kritische Aktion.
 
-`/t:cancel`
-`/t:no`
+`/t:cancel`  
+`/t:no`  
 Bricht eine kritische Aktion ab.
 Diese werden ebenfalls abgebrochen,
 wenn ein anderer Befehl vorher eingegeben wurde.
@@ -99,7 +117,7 @@ wenn ein anderer Befehl vorher eingegeben wurde.
 `/t:add <Player> [<Player> [...]]`  
 Fügt einen oder mehrere Spieler der aktiven Runde hinzu
 
-`/t:rm`
+`/t:rm`  
 `/t:remove <Player>`  
 Entfernt einen Spieler aus der aktiven Runde.
 
@@ -122,7 +140,7 @@ Sofern bereits eine Paarung im Gange ist,
 werden aktuelle Informationen über die Paarung ausgegeben.
 
 `/t:w`  
-`/t:win <Player>`
+`/t:win <Player>`  
 Setzt den Gewinner der aktuellen Paarung.
 Hierfür muss vorher `/t:play` aufgerufen worden sein,
 d.h. dass aktuell eine Paarung laufen muss.
