@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "tournament",
+  "version": "${version}",
+
+  "name": "Tournament",
+  "description": "Mod to handle simple tournaments with ingame comments and messages",
+  "authors": [
+    "Jonas van den Berg"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/tournament",
+    "sources": "https://github.com/vonas/tournament"
+  },
+
+  "license": "UNLICENSED",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.vonas.tournament.TournamentMod"
+    ]
+  },
+  "mixins": [
+    "modid.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
