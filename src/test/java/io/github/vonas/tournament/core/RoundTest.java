@@ -1,5 +1,6 @@
 package io.github.vonas.tournament.core;
 
+import io.github.vonas.tournament.TestEntrant;
 import io.github.vonas.tournament.exceptions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,9 +20,9 @@ class RoundTest {
     private DynamicRound round;
     private DynamicRound twoEntrantRound;
 
-    private final Entrant entrantA = new Entrant(UUIDs[0]);
-    private final Entrant entrantB = new Entrant(UUIDs[1]);
-    private final Entrant invalidEntrant = new Entrant(UUIDs[2]);
+    private final Entrant entrantA = new TestEntrant(UUIDs[0]);
+    private final Entrant entrantB = new TestEntrant(UUIDs[1]);
+    private final Entrant invalidEntrant = new TestEntrant(UUIDs[2]);
 
     private final Entrant winner = entrantA;
     private final Entrant loser = entrantB;
