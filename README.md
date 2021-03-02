@@ -144,6 +144,11 @@ wer gewonnen und wer verloren hat.
 Listet alle Paarungen vergangener Runden auf.
 Zeigt ebenfalls aktuell laufende, ausstehende Paarungen.
 
+`/t:s`  
+`/t:status`
+Gibt aktuell wichtige Statusinformationen aus,
+wie z.B. die aktuell laufende(n) Paarung(en).
+
 #### Paarungen generieren
 
 `/t:p`  
