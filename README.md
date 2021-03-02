@@ -115,11 +115,17 @@ wenn ein anderer Befehl vorher eingegeben wurde.
 
 `/t:a`  
 `/t:add <Player> [<Player> [...]]`  
-Fügt einen oder mehrere Spieler der aktiven Runde hinzu
+Fügt einen oder mehrere Spieler der aktiven Runde hinzu.
 
 `/t:rm`  
 `/t:remove <Player>`  
 Entfernt einen Spieler aus der aktiven Runde.
+
+`/t:ls`  
+`/t:list`  
+Alle Spieler der aktuellen Runde auflisten.
+Informiert ebenfalls darüber wer bereits gespielt,
+wer gewonnen und wer verloren hat.
 
 #### Paarungen generieren
 
