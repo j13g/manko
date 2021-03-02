@@ -55,6 +55,15 @@ oder im Nachhinein noch Spieler hinzugefügt werden können.
 Diese Modifikation nimmt an,
 dass die erste Runde niemals das Finale ist.
 
+### Parallel aktive Paarungen
+
+Paarungen können parallel durchgeführt werden.
+Wenn ein Sieger festgelegt wird,
+kann damit auf die zugehörige Paarung geschlossen werden.
+
+> **TODO**  
+> Die aktuelle Implementierung kann nur eine Paarung handhaben.
+
 ### Speicherung von Zustandsdaten
 
 Daten werden in einer SQLite-Datenbank gespeichert.
@@ -121,11 +130,19 @@ Fügt einen oder mehrere Spieler der aktiven Runde hinzu.
 `/t:remove <Player>`  
 Entfernt einen Spieler aus der aktiven Runde.
 
+#### Informationen erhalten
+
+`/t:l`  
 `/t:ls`  
 `/t:list`  
-Alle Spieler der aktuellen Runde auflisten.
+Listet alle Spieler der aktuellen Runde auf.
 Informiert ebenfalls darüber wer bereits gespielt,
 wer gewonnen und wer verloren hat.
+
+`/t:h`  
+`/t:history`  
+Listet alle Paarungen vergangener Runden auf.
+Zeigt ebenfalls aktuell laufende, ausstehende Paarungen.
 
 #### Paarungen generieren
 
