@@ -107,8 +107,8 @@ Zur Bestätigung muss `/t:yes` eingegeben werden.
 Exportiert Turnierdaten im leserlichen Textformat,
 als auch die Datenbank im Rohformat.
 Die Text-Datei ist so aufgebaut,
-dass mit den Dort verfügbaren Daten
-das Turnier manuell forgesetzt werden kann.
+dass mit den dort verfügbaren Daten
+das Turnier manuell fortgesetzt werden kann.
 
 #### Kritische Aktionen
 
