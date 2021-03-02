@@ -196,5 +196,5 @@ Diese Modifikation benötigt Fabric API Version 0.31.0 oder höher.
 
 ## Lizenz
 
-(c) 2021 Jonas van den Berg  
-currently `UNLICENSED`
+MIT License  
+(c) 2021 Jonas van den Berg
