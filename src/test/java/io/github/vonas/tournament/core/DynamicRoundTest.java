@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DynamicRoundTest {
 
-    private UUID[] UUIDs = {
+    private final UUID[] UUIDs = {
         UUID.fromString("e229d301-2a54-421a-8e26-8aff8e3dc340"),
         UUID.fromString("25624446-a0dd-4781-88d9-2072c92c79fe"),
         UUID.fromString("c208ed38-cdfe-4557-8cca-7c5191d7278f")
@@ -57,7 +57,7 @@ class DynamicRoundTest {
 
     @Test
     void twoEntrants_nextPairing_noPendingEntrants() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.nextPairing();
         assertTrue(twoEntrantRound.getPendingEntrants().isEmpty());
     }
 
@@ -84,7 +84,7 @@ class DynamicRoundTest {
 
     @Test
     void pairing_declareInvalidWinner_throwsNoSuchEntrant() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.nextPairing();
         assertThrows(NoSuchEntrantException.class, () -> twoEntrantRound.declareWinner(invalidEntrant));
     }
 
@@ -95,7 +95,7 @@ class DynamicRoundTest {
 
     @Test
     void pairing_declareWinner_winnerAdvancesAndLoserEliminated() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.nextPairing();
         twoEntrantRound.declareWinner(winner);
         Set<Entrant> advancedEntrants = twoEntrantRound.getAdvancedEntrants();
         Set<Entrant> eliminatedEntrants = twoEntrantRound.getEliminatedEntrants();
@@ -116,14 +116,14 @@ class DynamicRoundTest {
 
     @Test
     void twoEntrants_declareWinner_roundFinished() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.nextPairing();
         twoEntrantRound.declareWinner(winner);
         assertTrue(twoEntrantRound.isFinished());
     }
 
     @Test
     void eliminatedEntrant_reviveEliminated_eliminatedPending() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.nextPairing();
         twoEntrantRound.declareWinner(winner);
         twoEntrantRound.reviveEntrant(loser);
         assertTrue(twoEntrantRound.getEliminatedEntrants().isEmpty());
@@ -139,14 +139,14 @@ class DynamicRoundTest {
 
     @Test
     void pairingPending_removeOneEntrant_otherEntrantPending() throws Exception {
-        Pairing pendingPairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.nextPairing();
         twoEntrantRound.removeEntrant(entrantA);
         assertTrue(twoEntrantRound.getPendingEntrants().contains(entrantB));
     }
 
     @Test
     void finishedRound_removeAllEntrants_noEntrantsAndPairings() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.nextPairing();
         twoEntrantRound.declareWinner(entrantA);
         twoEntrantRound.removeEntrant(entrantA);
         twoEntrantRound.removeEntrant(entrantB);
