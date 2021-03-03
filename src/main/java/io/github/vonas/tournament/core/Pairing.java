@@ -1,5 +1,6 @@
 package io.github.vonas.tournament.core;
 
+import com.google.common.base.Objects;
 import io.github.vonas.tournament.exceptions.NoSuchEntrantException;
 
 // TODO: Add team functionality.
@@ -29,5 +30,20 @@ public class Pairing {
 
     public boolean hasEntrant(Entrant entrant) {
         return entrant == entrant1 || entrant == entrant2;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (!(o instanceof Pairing)) return false;
+
+        Pairing other = (Pairing)o;
+        return entrant1.getUuid().equals(other.entrant1.getUuid())
+            && entrant2.getUuid().equals(other.entrant2.getUuid());
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hashCode(entrant1, entrant2);
     }
 }
