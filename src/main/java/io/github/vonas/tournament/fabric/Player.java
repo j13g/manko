@@ -1,4 +1,4 @@
-package io.github.vonas.tournament;
+package io.github.vonas.tournament.fabric;
 
 import com.mojang.brigadier.context.CommandContext;
 import io.github.vonas.tournament.core.Entrant;
