@@ -2,7 +2,7 @@ package io.github.vonas.tournament.core;
 
 import java.util.UUID;
 
-public abstract class Entrant implements Comparable<Entrant> {
+public abstract class Entrant {
 
     /**
      * @return The UUID of this Entrant.
@@ -21,10 +21,5 @@ public abstract class Entrant implements Comparable<Entrant> {
     @Override
     public int hashCode(){
         return getUuid().hashCode();
-    }
-
-    @Override
-    public int compareTo(Entrant other){
-        return getUuid().compareTo(other.getUuid());
     }
 }
