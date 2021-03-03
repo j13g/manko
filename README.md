@@ -36,6 +36,40 @@ Bei drei Spielern geht es im Round Robin weiter.
 Platzierungen gehen immer an die ersten 3 Gewinner.
 Basierend darauf wird auch das Finale ausgetragen.
 
+## Limitierungen
+
+Um den Programmieraufwand in Grenzen zu halten
+und möglichst zeitig ein brauchbares Programm zu erhalten,
+werden bestimmte Limitierungen eingeführt.
+Damit wird verhindert das System unnötig allgemein zu formulieren,
+wenn es doch ursprünglich
+für einen sehr speziellen Zweck entwickelt werden sollte.
+
+### Anzahl der Gewinner
+
+Es werden exakt 3 Gewinner bestimmt.
+Dies kann nicht konfiguriert werden.
+
+### Notwendige Spieleranzahl für das Finale
+
+Das Finale kann nicht in der ersten Runde ausgetragen werden.
+Um in die nächste Runde überzugehen werden mindestens 3 Spieler benötigt.
+Dies ist mit der vorherigen Limitierung gekoppelt (3 Gewinner).
+Das heißt, dass das Turnier mindestens 6 Spieler in der ersten Runde benötigt.
+Man könnte aus der ersten Runde ableiten,
+welcher der Verlierer noch im Finale spielen soll,
+um die oben genannten drei Platzierungen zu belegen.
+Der Entwicklungsaufwand steht jedoch nicht in Relation zum tatsächlichen Nutzen,
+da sich ein Turnier mit fünf oder weniger Teilnehmern kaum lohnen würde.
+
+### Art des Turniers
+
+Die Art des Turniers ist folgendermaßen festgelegt.
+Die ersten Runden werden im K.O.-System (single-elimination) durchgeführt.
+Basierend auf der Anzahl an Spielern im Finale (3 oder 4)
+wird entweder im Round Robin oder weiterhin im K.O.-System fortgesetzt.
+Andere Arten der Ausführung sind nicht konfigurierbar.
+
 ## Konzepte
 
 ### Dynamisches Turnier
