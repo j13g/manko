@@ -8,10 +8,9 @@ public class DynamicRound extends Round {
 
     /**
      * Holds the entrants that have not yet appeared in a pairing.
-     * The order is arbitrary and is shuffled whenever a new pairing is generated.
-     * Changes to the order will likely be overwritten.
      */
     private final ArrayList<Entrant> pendingEntrants = new ArrayList<>();
+    private final Random random = new Random();
 
     private final HashSet<Entrant> advancedEntrants = new HashSet<>();
     private final HashSet<Entrant> eliminatedEntrants = new HashSet<>();
@@ -98,9 +97,8 @@ public class DynamicRound extends Round {
         if (pendingEntrants.size() == 0) throw new NoEntrantsException();
         if (pendingEntrants.size() == 1) throw new NoOpponentException();
 
-        Collections.shuffle(pendingEntrants);
-        Entrant first = popPendingEntrant();
-        Entrant second = popPendingEntrant();
+        Entrant first = popRandomPendingEntrant();
+        Entrant second = popRandomPendingEntrant();
 
         activePairing = new Pairing(first, second);
         return activePairing;
@@ -164,8 +162,14 @@ public class DynamicRound extends Round {
         return pendingEntrants.isEmpty();
     }
 
-    private Entrant popPendingEntrant() throws IndexOutOfBoundsException {
-        int index = pendingEntrants.size() - 1;
-        return pendingEntrants.remove(index);
+    private Entrant popRandomPendingEntrant() throws IndexOutOfBoundsException {
+        int index = random.nextInt(pendingEntrants.size());
+        int lastIndex = pendingEntrants.size() - 1;
+
+        Entrant declared = pendingEntrants.get(index);
+        pendingEntrants.set(index, pendingEntrants.get(lastIndex));
+        pendingEntrants.remove(lastIndex);
+
+        return declared;
     }
 }
