@@ -49,6 +49,9 @@ für einen sehr speziellen Zweck entwickelt werden sollte.
 
 Es werden exakt 3 Gewinner bestimmt.
 Dies kann nicht konfiguriert werden.
+Nach Bedarf können Platzierungen weggelassen
+oder der vierte Platz hinzugedacht werden.
+Eine entsprechende Programmierung ist nicht vorgesehen.
 
 ### Notwendige Spieleranzahl für das Finale
 
