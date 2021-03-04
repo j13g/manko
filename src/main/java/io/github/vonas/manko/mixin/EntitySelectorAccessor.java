@@ -1,4 +1,4 @@
-package io.github.vonas.tournament.mixin;
+package io.github.vonas.manko.mixin;
 
 import net.minecraft.command.EntitySelector;
 import org.spongepowered.asm.mixin.Mixin;

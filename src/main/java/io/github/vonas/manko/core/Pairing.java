@@ -1,7 +1,7 @@
-package io.github.vonas.tournament.core;
+package io.github.vonas.manko.core;
 
 import com.google.common.base.Objects;
-import io.github.vonas.tournament.exceptions.NoSuchEntrantException;
+import io.github.vonas.manko.exceptions.NoSuchEntrantException;
 
 // TODO: Add team functionality.
 public class Pairing {

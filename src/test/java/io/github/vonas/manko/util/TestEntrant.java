@@ -1,6 +1,6 @@
-package io.github.vonas.tournament.util;
+package io.github.vonas.manko.util;
 
-import io.github.vonas.tournament.core.Entrant;
+import io.github.vonas.manko.core.Entrant;
 
 import java.util.HashSet;
 import java.util.Set;

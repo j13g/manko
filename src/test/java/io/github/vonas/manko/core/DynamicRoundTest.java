@@ -1,7 +1,7 @@
-package io.github.vonas.tournament.core;
+package io.github.vonas.manko.core;
 
-import io.github.vonas.tournament.exceptions.*;
-import io.github.vonas.tournament.util.TestEntrant;
+import io.github.vonas.manko.exceptions.*;
+import io.github.vonas.manko.util.TestEntrant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

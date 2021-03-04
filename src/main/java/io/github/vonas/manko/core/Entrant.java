@@ -1,4 +1,4 @@
-package io.github.vonas.tournament.core;
+package io.github.vonas.manko.core;
 
 import java.util.UUID;
 

@@ -1,9 +1,9 @@
-package io.github.vonas.tournament.fabric;
+package io.github.vonas.manko.fabric;
 
 import com.mojang.brigadier.context.CommandContext;
-import io.github.vonas.tournament.core.Entrant;
-import io.github.vonas.tournament.exceptions.MissingPlayerException;
-import io.github.vonas.tournament.mixin.EntitySelectorAccessor;
+import io.github.vonas.manko.core.Entrant;
+import io.github.vonas.manko.exceptions.MissingPlayerException;
+import io.github.vonas.manko.mixin.EntitySelectorAccessor;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.command.EntitySelector;

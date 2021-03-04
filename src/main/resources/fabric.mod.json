@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "tournament",
+  "id": "manko",
   "version": "${version}",
 
-  "name": "Tournament",
-  "description": "Mod to handle simple tournaments with ingame comments and messages",
+  "name": "Manko",
+  "description": "Manual Knockout Tournaments within Minecraft",
   "authors": [
     "Jonas van den Berg"
   ],
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/tournament",
-    "sources": "https://github.com/vonas/tournament"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/manko",
+    "sources": "https://github.com/vonas/manko"
   },
 
   "license": "UNLICENSED",
@@ -19,7 +19,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.vonas.tournament.TournamentMod"
+      "io.github.vonas.manko.Manko"
     ]
   },
   "mixins": [

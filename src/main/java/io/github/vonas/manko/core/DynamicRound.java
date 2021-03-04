@@ -1,6 +1,6 @@
-package io.github.vonas.tournament.core;
+package io.github.vonas.manko.core;
 
-import io.github.vonas.tournament.exceptions.*;
+import io.github.vonas.manko.exceptions.*;
 
 import java.util.*;
 

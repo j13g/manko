@@ -1,9 +1,9 @@
-package io.github.vonas.tournament.core;
+package io.github.vonas.manko.core;
 
-import io.github.vonas.tournament.exceptions.MissingPairingException;
-import io.github.vonas.tournament.exceptions.NoEntrantsException;
-import io.github.vonas.tournament.exceptions.NoOpponentException;
-import io.github.vonas.tournament.exceptions.NoSuchEntrantException;
+import io.github.vonas.manko.exceptions.MissingPairingException;
+import io.github.vonas.manko.exceptions.NoEntrantsException;
+import io.github.vonas.manko.exceptions.NoOpponentException;
+import io.github.vonas.manko.exceptions.NoSuchEntrantException;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,6 +48,9 @@ public abstract class Round {
     public abstract void declareWinner(Entrant entrant)
         throws NoSuchEntrantException, MissingPairingException;
     // TODO Also write a declareWinner method in Pairing that references the Round.
+
+    // TODO undo a declareWinner, i.e. "undeclare" a winner.
+    public void undo() {}
 
     /**
      * @return All entrants of this round.
