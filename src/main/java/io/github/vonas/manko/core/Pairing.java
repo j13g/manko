@@ -5,7 +5,6 @@ import io.github.vonas.manko.exceptions.NoSuchEntrantException;
 
 import java.io.Serializable;
 
-// TODO: Add team functionality.
 public class Pairing implements Serializable {
 
     private final Entrant entrant1;
