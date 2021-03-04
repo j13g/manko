@@ -1,9 +1,18 @@
-# vonas/tournament
+# Manko - Manual Knockout
 
-Diese Modifikation unterstützt den Spieler dabei
-einfache Turniere innerhalb des Spiels mit Befehlen zu verwalten.
+Diese Modifikation unterstützt den Nutzer dabei
+einfache und dynamische K.O.-Turniere
+innerhalb des Spiels mit Befehlen zu verwalten.
 
-Dadurch muss nicht das Anwendungsfenster gewechselt werden
+> **Manko** (lat. *mancus*), &bdquo;unvollständig&ldquo; &ndash;
+Turniere im Sinne dieser Modifikation sind dynamisch.
+Teilnehmer werden während des Ablaufs hinzugefügt
+und sind nicht zwingend zu Beginn des Turniers bekannt.
+Das Turnier ist anfangs unvollständig.
+
+## Vorteile
+
+Das Anwendungsfenster muss nicht gewechselt werden
 und man kann bei Eingabe des Namens eines Spielers
 auf die Auto-Vervollständigung des Spiels zurückgreifen.
 Ankündigungen darüber, wer als Nächstes dran ist,
