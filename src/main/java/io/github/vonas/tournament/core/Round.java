@@ -52,8 +52,8 @@ public abstract class Round {
     /**
      * @return All entrants of this round.
      */
-    public HashSet<Entrant> getEntrants() {
-        return entrants;
+    public Set<Entrant> getEntrants() {
+        return Collections.unmodifiableSet(entrants);
     }
 
     /**
