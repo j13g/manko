@@ -5,11 +5,12 @@ import io.github.vonas.manko.exceptions.NoEntrantsException;
 import io.github.vonas.manko.exceptions.NoOpponentException;
 import io.github.vonas.manko.exceptions.NoSuchEntrantException;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class Round {
+public abstract class Round implements Serializable {
 
     protected final HashSet<Entrant> entrants = new HashSet<>();
 
@@ -99,4 +100,7 @@ public abstract class Round {
      * @return If the current round is finished.
      */
     public abstract boolean isFinished();
+
+    @Override
+    public abstract boolean equals(Object obj);
 }

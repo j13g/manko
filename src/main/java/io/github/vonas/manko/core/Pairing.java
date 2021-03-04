@@ -3,8 +3,10 @@ package io.github.vonas.manko.core;
 import com.google.common.base.Objects;
 import io.github.vonas.manko.exceptions.NoSuchEntrantException;
 
+import java.io.Serializable;
+
 // TODO: Add team functionality.
-public class Pairing {
+public class Pairing implements Serializable {
 
     private final Entrant entrant1;
     private final Entrant entrant2;
@@ -33,7 +35,7 @@ public class Pairing {
     }
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Pairing)) return false;
 
@@ -43,7 +45,7 @@ public class Pairing {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return Objects.hashCode(entrant1, entrant2);
     }
 }

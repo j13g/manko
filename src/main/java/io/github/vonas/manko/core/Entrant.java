@@ -1,8 +1,9 @@
 package io.github.vonas.manko.core;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public abstract class Entrant {
+public abstract class Entrant implements Serializable {
 
     /**
      * @return The UUID of this Entrant.

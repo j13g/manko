@@ -10,7 +10,7 @@ public class DynamicRound extends Round {
      * Holds the entrants that have not yet appeared in a pairing.
      */
     private final ArrayList<Entrant> pendingEntrants = new ArrayList<>();
-    private final Random random = new Random();
+    private final transient Random random = new Random();
 
     private final HashSet<Entrant> advancedEntrants = new HashSet<>();
     private final HashSet<Entrant> eliminatedEntrants = new HashSet<>();
@@ -171,5 +171,17 @@ public class DynamicRound extends Round {
         pendingEntrants.remove(lastIndex);
 
         return declared;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DynamicRound))
+            return false;
+
+        DynamicRound other = (DynamicRound)o;
+        return pendingEntrants.equals(other.pendingEntrants)
+            && advancedEntrants.equals(other.advancedEntrants)
+            && eliminatedEntrants.equals(other.eliminatedEntrants);
     }
 }
