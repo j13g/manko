@@ -117,82 +117,115 @@ und speichert den neuen Zustand direkt im Anschluss ab.
 
 ## Befehle
 
+Solche Befehle, welche kritische Aktionen durchführen,
+müssen bestätigt werden, indem der Befehl erneut gesendet wird.
+Konkret bedeutet dies im Spiel: Die obere Pfeiltaste und Enter drücken.
+Alternativ kann mit `/t:cancel` oder der Eingabe eines anderen Befehls abgebrochen werden.
+Befehle, die dieser Regel unterliegen,
+erhalten ein `(y/n)` Suffix.
+
+Befehle mit einem Alias, d.h. mit einer kürzeren Version,
+die schneller eingetippt ist, werden folgendermaßen angegeben:
+> `/t:a /t:alias <Argument>`
+
 ### Verwaltung
 
 #### Ein Turnier starten
 
-`/t:new`  
-`/t:start`  
+```
+/t:new
+```
 Startet ein neues Turnier.
 Dies ist nur möglich,
 sofern nicht bereits ein Turnier vorhanden ist.
 
 #### Ein Turnier beenden
 
-`/t:delete`  
-`/t:stop`  
+```
+/t:end  (y/n)
+```
 Beendet das aktuelle Turnier
 und löscht alle vorhandenen Daten.
-Zur Bestätigung muss `/t:yes` eingegeben werden.
 
 #### Daten exportieren
 
-`/t:export`  
+```
+/t:export
+```
 Exportiert Turnierdaten im leserlichen Textformat,
-als auch die Datenbank im Rohformat.
+als auch die Datenbank im Rohformat,
+um diese später oder mit einem anderen Client laden zu können.
 Die Text-Datei ist so aufgebaut,
 dass mit den dort verfügbaren Daten
-das Turnier manuell fortgesetzt werden kann.
+das Turnier manuell fortgesetzt werden könnte.
 
-#### Kritische Aktionen
+#### Teilnehmer auflisten 
 
-`/t:yes`  
-Bestätigt eine kritische Aktion.
-
-`/t:cancel`  
-`/t:no`  
-Bricht eine kritische Aktion ab.
-Diese werden ebenfalls abgebrochen,
-wenn ein anderer Befehl vorher eingegeben wurde.
-
-### Turnier-Durchführung
-
-#### Teilnehmer verwalten
-
-`/t:a`  
-`/t:add <Player> [<Player> [...]]`  
-Fügt einen oder mehrere Spieler der aktiven Runde hinzu.
-Falls der Spieler bereits in der Runde ist passiert nichts.
-Falls dieser jedoch verloren hat und sonst nicht mehr teilnehmen würde,
-erhält der Spieler eine zweite Chance.
-
-`/t:rm`  
-`/t:remove <Player>`  
-Entfernt einen Spieler aus der aktiven Runde.
-
-#### Informationen erhalten
-
-`/t:l`  
-`/t:ls`  
-`/t:list`  
+```
+/t:list
+```
 Listet alle Spieler der aktuellen Runde auf.
 Informiert ebenfalls darüber wer bereits gespielt,
 wer gewonnen und wer verloren hat.
 
-`/t:h`  
-`/t:history`  
-Listet alle Paarungen vergangener Runden auf.
-Zeigt ebenfalls aktuell laufende, ausstehende Paarungen.
+#### Paarungen ausgeben
 
-`/t:s`  
-`/t:status`
-Gibt aktuell wichtige Statusinformationen aus,
-wie z.B. die aktuell laufende(n) Paarung(en).
+```
+/t:pairings
+```  
+Listet alle vergangenen und aktiven Paarungen der aktuellen Runde auf.
+
+```
+/t:pairings all
+```
+Listet alle vergangenen und aktiven Paarungen aller Runden auf.
+
+```
+/t:c /t:current
+```
+Gibt grundlegende Informationen zur aktuellen Runde
+und zu momentan laufenden Paarungen aus.
+Außerdem ggf. einige Meta-Informationen.
+Die Ausgabe soll möglichst kurz gehalten werden
+
+```
+/t:last
+```
+Gibt die wichtigsten Informationen zur letzten beendeten Paarung aus. 
+
+#### Eine kritische Aktion abbrechen
+
+```
+/t:cancel
+```
+Bricht eine kritische Aktion ab.
+
+### Turnier-Durchführung
+
+#### Teilnehmer hinzufügen
+
+```
+/t:a /t:add <Player> [<Player2> [...]]
+```
+Fügt einen oder mehrere Spieler der aktiven Runde hinzu.
+Falls der Spieler bereits in der Runde ist, passiert nichts.
+Falls dieser jedoch verloren hat und sonst nicht mehr teilnehmen würde,
+erhält der Spieler eine zweite Chance.
+
+#### Einen Teilnehmer entfernen
+
+```
+/t:remove <Player>  (y/n)
+```
+Entfernt einen Spieler aus der aktiven Runde.
+Befindet sich der Spieler in einer Paarung,
+so wird die Paarung aufgelöst.
 
 #### Paarungen generieren
 
-`/t:p`  
-`/t:play`  
+```
+/t:p /t:pair
+```
 Erzeugt eine neue Paarung zwischen zwei zufälligen Spielern.
 Wählt unter Spielern aus,
 welche während der aktuellen Runde noch in keiner Paarung vorhanden waren.
@@ -204,27 +237,52 @@ dass ein Spieler hinzugefügt
 oder der letzte Spieler entfernt werden muss.
 Bei weniger als vier Spielern
 werden entsprechend die Finalrunden eingeleitet.
-Sofern bereits eine Paarung im Gange ist,
-werden aktuelle Informationen über die Paarung ausgegeben.
 
-`/t:w`  
-`/t:win <Player>`  
-Setzt den Gewinner der aktuellen Paarung.
-Hierfür muss vorher `/t:play` aufgerufen worden sein,
-d.h. dass aktuell eine Paarung laufen muss.
+```
+/t:p /t:pair <Player1> <Player2>
+```
+Fügt eine manuelle Paarung zwischen zwei Spielern hinzu.
+
+#### Gewinner bestimmen
+
+```
+/t:w /t:win <Player>
+```
+Deklariert den Gewinner einer aktuell laufenden Paarung.
+
+#### Spieler zurücksetzen
+
+```
+/t:reset <Player1> [<Player2> [..]]  (y/n)
+```
+Setzt einen oder mehrere Teilnehmer auf den Ursprungszustand zurück.
+Äquivalent dazu, diese erst zu entfernen und dann wieder hinzuzufügen.
+
+```
+/t:repair <Player1> <Player2>
+```
+Paart zwei Spieler erneut, als wären sie gerade hinzugefügt worden
+(`repair` im Sinne von "erneut paaren", "re-pair").
+Beide Spieler müssen zuvor in einer Paarung vorgekommen sein.
 
 #### Runden fortschreiten
 
-`/r:next`  
+```
+/t:next
+```
 Setzt mit der nächsten Runde fort.
 Dies ist nur möglich,
 sofern alle Spieler der Runde bereits in einer Paarung waren.
-Wirft einen Fehler falls noch eine Paarung aktiv ist (`/t:play`).
+Gibt einen Fehler aus, falls noch eine Paarung aktiv ist.
 
-`/r:prev`  
-`/r:previous`  
-Geht zurück in die letzte Runde,
-falls ein Spieler nachträglich teilnehmen möchte.
+#### Zur vorherigen Runde zurückkehren
+
+```
+/t:back
+```
+
+Geht zurück zur letzten Runde,
+falls zum Beispiel ein Spieler nachträglich teilnehmen möchte.
 Dies ist nur möglich,
 wenn noch keine Paarung der aktuellen Runde begonnen hat.
 
