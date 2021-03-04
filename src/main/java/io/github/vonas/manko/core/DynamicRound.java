@@ -25,7 +25,7 @@ public class DynamicRound extends Round {
      * Creates a new round for a tournament with initial entrants.
      * @param entrants The initial entrants.
      */
-    public DynamicRound(List<Entrant> entrants) {
+    public DynamicRound(Set<Entrant> entrants) {
         for (Entrant entrant : entrants)
             this.addEntrant(entrant);
     }

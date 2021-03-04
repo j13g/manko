@@ -24,7 +24,7 @@ class DynamicRoundTest {
     @BeforeEach
     void init() {
         round = new DynamicRound();
-        twoEntrantRound = new DynamicRound(Arrays.asList(entrantA, entrantB));
+        twoEntrantRound = new DynamicRound(new HashSet<>(Arrays.asList(entrantA, entrantB)));
     }
 
     // TODO Add test that checks if nextPairing()
