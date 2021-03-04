@@ -70,6 +70,14 @@ Basierend auf der Anzahl an Spielern im Finale (3 oder 4)
 wird entweder im Round Robin oder weiterhin im K.O.-System fortgesetzt.
 Andere Arten der Ausführung sind nicht konfigurierbar.
 
+### Keine parallel laufenden Turniere
+
+Diese Modifikation ist an die gerichtet,
+die vollkommen manuell Turniere im Spiel durchführen möchten.
+Dabei ergibt es keinen Sinn mehrere gleichzeitig durchzuführen,
+weshalb es auch nicht möglich ist mehr als eines
+zu einem gegebenen Zeitpunkt zu halten.
+
 ## Konzepte
 
 ### Dynamisches Turnier
