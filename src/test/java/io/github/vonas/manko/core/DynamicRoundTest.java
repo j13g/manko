@@ -4,6 +4,8 @@ import io.github.vonas.manko.exceptions.*;
 import io.github.vonas.manko.util.TestEntrant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
 
@@ -77,7 +79,7 @@ class DynamicRoundTest {
     }
 
     @Test
-    void pairing_declareInvalidWinner_throwsNoSuchEntrant() throws Exception {
+    void pairing_declareInvalidEntrantAsWinner_throwsNoSuchEntrant() throws Exception {
         twoEntrantRound.nextPairing();
         assertThrows(NoSuchEntrantException.class, () -> twoEntrantRound.declareWinner(invalidEntrant));
     }
@@ -116,15 +118,6 @@ class DynamicRoundTest {
     }
 
     @Test
-    void eliminatedEntrant_reviveEliminated_eliminatedPending() throws Exception {
-        twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        twoEntrantRound.reviveEntrant(loser);
-        assertTrue(twoEntrantRound.getEliminatedEntrants().isEmpty());
-        assertTrue(twoEntrantRound.getPendingEntrants().contains(loser));
-    }
-
-    @Test
     void oneEntrant_removeEntrant_noEntrants() {
         round.addEntrant(entrantA);
         round.removeEntrant(entrantA);
@@ -139,7 +132,7 @@ class DynamicRoundTest {
     }
 
     @Test
-    void finishedRound_removeAllEntrants_noEntrantsAndPairings() throws Exception {
+    void finishedRound_removeAllEntrants_noEntrants() throws Exception {
         twoEntrantRound.nextPairing();
         twoEntrantRound.declareWinner(entrantA);
         twoEntrantRound.removeEntrant(entrantA);
@@ -151,11 +144,40 @@ class DynamicRoundTest {
         assertEquals(0, twoEntrantRound.getFinishedPairings().size());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1})
+    void finishedRound_removeOneEntrant_keepAllPairings(int e) throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.declareWinner(winner);
+        twoEntrantRound.removeEntrant(e == 0 ? entrantA : entrantB);
+        assertEquals(1, twoEntrantRound.getFinishedPairings().size());
+    }
+
     @Test
-    void finishedRound_removeLoser_keepAdvancedEntrantsFinishedPairing() throws Exception {
+    void eliminatedEntrant_resetEliminated_eliminatedPending() throws Exception {
+        twoEntrantRound.nextPairing();
+        twoEntrantRound.declareWinner(winner);
+        twoEntrantRound.resetEntrant(loser);
+        assertTrue(twoEntrantRound.getEliminatedEntrants().isEmpty());
+        assertTrue(twoEntrantRound.getPendingEntrants().contains(loser));
+    }
+
+    @Test
+    void loserRemoved_resetWinner_pastPairingExists() throws Exception {
         Pairing pairing = twoEntrantRound.nextPairing();
         twoEntrantRound.declareWinner(winner);
         twoEntrantRound.removeEntrant(loser);
-        assertTrue(twoEntrantRound.getFinishedPairings().contains(pairing));
+        twoEntrantRound.resetEntrant(winner);
+        assertFalse(twoEntrantRound.getFinishedPairings().isEmpty());
+    }
+
+    @Test
+    void finishedRound_resetAll_previousPairingsUnchanged() throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.declareWinner(winner);
+        Set<Pairing> finishedPairings = twoEntrantRound.getFinishedPairings();
+        twoEntrantRound.resetEntrant(winner);
+        twoEntrantRound.resetEntrant(loser);
+        assertEquals(finishedPairings, twoEntrantRound.getFinishedPairings());
     }
 }

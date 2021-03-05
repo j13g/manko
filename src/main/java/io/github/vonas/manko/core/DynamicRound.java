@@ -40,19 +40,18 @@ public class DynamicRound extends Round {
     }
 
     /**
-     * Revives an eliminated entrant.
+     * Resets an entrant to its initial state.
+     * Previous pairings will not be removed.
      * @param entrant The entrant.
      * @throws NoSuchEntrantException The entrant is not part of this round.
-     * @throws NotEliminatedException The entrant was not eliminated by previous pairings.
      */
-    public void reviveEntrant(Entrant entrant) throws NoSuchEntrantException, NotEliminatedException {
+    public void resetEntrant(Entrant entrant) throws NoSuchEntrantException {
         if (!entrants.contains(entrant))
             throw new NoSuchEntrantException();
 
-        if (!eliminatedEntrants.contains(entrant))
-            throw new NotEliminatedException();
-
+        advancedEntrants.remove(entrant);
         eliminatedEntrants.remove(entrant);
+
         pendingEntrants.add(entrant);
     }
 
@@ -60,12 +59,6 @@ public class DynamicRound extends Round {
     public void removeEntrant(Entrant entrant) {
         if (!entrants.contains(entrant))
             return;
-
-        // Only remove the finished pairing(s) of this entrant
-        // if they have advanced to the next round.
-        // We only want to keep history of someone who advanced.
-        if (advancedEntrants.contains(entrant))
-            finishedPairings.removeIf(pairing -> pairing.hasEntrant(entrant));
 
         entrants.remove(entrant);
         advancedEntrants.remove(entrant);
@@ -75,6 +68,11 @@ public class DynamicRound extends Round {
         // elements to their new positions should be fine,
         // as entrants will not be deleted that frequently.
         pendingEntrants.remove(entrant);
+
+        // Remove all pairing where no entrant
+        // is part of this round anymore.
+        finishedPairings.removeIf(pairing ->
+            !entrants.contains(pairing.getEntrant1()) && !entrants.contains(pairing.getEntrant2()));
 
         if (!hasActivePairing()) return;
         if (!activePairing.hasEntrant(entrant)) return;
