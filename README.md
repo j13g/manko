@@ -306,6 +306,40 @@ falls zum Beispiel ein Spieler nachträglich teilnehmen möchte.
 Dies ist nur möglich,
 wenn noch keine Paarung der aktuellen Runde begonnen hat.
 
+### Integration in das Spiel
+
+In allen Nachrichten oder Befehlen,
+welche automatisch von der Modifikation gesendet werden,
+können folgende Variablen verwendet werden:
+
+| Variable | Bedeutung |
+| :---: | :--- |
+| `%1` | Name des ersten Spielers der aktuellen Paarung |
+| `%2` | Name des zweiten Spielers der aktuellen Paarung |
+
+#### Paarungen im Chat mitteilen
+
+```
+/t:on:pairing <MessageOrCommand>
+```
+Legt den Befehl oder die Chat-Nachricht fest,
+welche automatisch gesendet werden soll,
+sobald eine Paarung generiert wird.
+Falls kein Argument übergeben wird,
+wird auch keine Nachricht übermittelt.
+Das Argument kann beliebig langen Text enthalten.
+
+Beispiel: `/t:on:pairing Nächste Runde: %1 vs. %2`
+
+#### Befehls-Substitutionen
+
+```
+/t:alias <SubCommand> -- <MessageOrCommand>
+```
+Substituiert den Befehl `/t:<Subcommand>` mit `<Command>`.
+
+Beispiel: `/t:alias tp 1 -- /tpahere %1`
+
 ## Installation
 
 ### Abhängigkeiten
