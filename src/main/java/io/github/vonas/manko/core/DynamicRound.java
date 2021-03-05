@@ -2,6 +2,8 @@ package io.github.vonas.manko.core;
 
 import io.github.vonas.manko.exceptions.*;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.*;
 
 public class DynamicRound extends Round {
@@ -10,7 +12,7 @@ public class DynamicRound extends Round {
      * Holds the entrants that have not yet appeared in a pairing.
      */
     private final ArrayList<Entrant> pendingEntrants = new ArrayList<>();
-    private final transient Random random = new Random();
+    private transient Random random;
 
     private final HashSet<Entrant> advancedEntrants = new HashSet<>();
     private final HashSet<Entrant> eliminatedEntrants = new HashSet<>();
@@ -19,13 +21,16 @@ public class DynamicRound extends Round {
      * Creates a new round for a tournament. No entrants are known in advance.
      * This is the default for the first round of a dynamic tournament.
      */
-    public DynamicRound() {}
+    public DynamicRound() {
+        initTransient();
+    }
 
     /**
      * Creates a new round for a tournament with initial entrants.
      * @param entrants The initial entrants.
      */
     public DynamicRound(Set<Entrant> entrants) {
+        this();
         for (Entrant entrant : entrants)
             this.addEntrant(entrant);
     }
@@ -237,5 +242,14 @@ public class DynamicRound extends Round {
         return pendingEntrants.equals(other.pendingEntrants)
             && advancedEntrants.equals(other.advancedEntrants)
             && eliminatedEntrants.equals(other.eliminatedEntrants);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        initTransient();
+    }
+
+    private void initTransient() {
+        random = new Random();
     }
 }
