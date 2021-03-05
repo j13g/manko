@@ -258,10 +258,6 @@ oder der letzte Spieler entfernt werden muss.
 Bei weniger als vier Spielern
 werden entsprechend die Finalrunden eingeleitet.
 
-```
-/t:p /t:pair <Player1> <Player2>
-```
-Fügt eine manuelle Paarung zwischen zwei Spielern hinzu.
 
 #### Gewinner bestimmen
 
