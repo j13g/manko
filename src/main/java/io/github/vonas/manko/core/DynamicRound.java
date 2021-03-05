@@ -75,13 +75,14 @@ public class DynamicRound extends Round {
         // as entrants will not be deleted that frequently.
         pendingEntrants.remove(entrant);
 
-        // Remove all pairing where no entrant
-        // is part of this round anymore.
+        // TODO Don't remove anything from finishedPairings. Make it an array.
+        // Remove all pairings where no entrant is part of this round anymore.
         finishedPairings.removeIf(pairing ->
             !entrants.contains(pairing.getEntrant1()) && !entrants.contains(pairing.getEntrant2()));
 
         if (!hasActivePairing()) return;
-        if (!activePairing.hasEntrant(entrant)) return;
+        if (!activePairing.hasEntrant(entrant))
+            return;
 
         Entrant other;
         try {
