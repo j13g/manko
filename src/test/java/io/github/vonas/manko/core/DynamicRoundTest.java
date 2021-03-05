@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
 
+import static io.github.vonas.manko.core.SerializableTest.serializeDeserialize;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DynamicRoundTest {
@@ -227,5 +228,15 @@ class DynamicRoundTest {
         twoEntrantRound.declareWinner(entrantA);
         twoEntrantRound.redoPairing(pairing);
         assertEquals(0, twoEntrantRound.getPendingEntrants().size());
+    }
+
+    @Test
+    void finishedPairing_redoRepeatFinishPairing_identicalOutcomes() throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.declareWinner(winner);
+        DynamicRound snapshot = serializeDeserialize(twoEntrantRound, DynamicRound.class);
+        twoEntrantRound.redoPairing(pairing);
+        twoEntrantRound.declareWinner(winner);
+        assertEquals(snapshot, twoEntrantRound);
     }
 }

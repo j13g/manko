@@ -42,7 +42,7 @@ public class SerializableTest {
         assertSerializable(round, DynamicRound.class);
     }
 
-    private <T extends Serializable> void assertSerializable(T o, Class<T> type) {
+    public static <T extends Serializable> void assertSerializable(T o, Class<T> type) {
 
         try {
             assertEquals(o, serializeDeserialize(o, type));
@@ -51,7 +51,7 @@ public class SerializableTest {
         }
     }
 
-    private <T extends Serializable> T serializeDeserialize(T o, Class<T> type)
+    public static <T extends Serializable> T serializeDeserialize(T o, Class<T> type)
             throws IOException, ClassNotFoundException {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
