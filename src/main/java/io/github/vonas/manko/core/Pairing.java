@@ -26,11 +26,11 @@ public class Pairing implements Serializable {
         if (!hasEntrant(entrant))
             throw new NoSuchEntrantException();
 
-        return entrant == entrant1 ? entrant2 : entrant1;
+        return entrant.equals(entrant1) ? entrant2 : entrant1;
     }
 
     public boolean hasEntrant(Entrant entrant) {
-        return entrant == entrant1 || entrant == entrant2;
+        return entrant.equals(entrant1) || entrant.equals(entrant2);
     }
 
     @Override
