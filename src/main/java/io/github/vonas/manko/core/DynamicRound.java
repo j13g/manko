@@ -103,6 +103,37 @@ public class DynamicRound extends Round {
         return activePairing;
     }
 
+    /**
+     * Resets a pairing to the state before the winner was declared.
+     * The entrants of the pairing are reset and the pairing becomes the active pairing.
+     * @param pairing The pairing.
+     */
+    public void redoPairing(Pairing pairing)
+            throws PairingNotFinishedException, NoSuchPairingException, MissingEntrantException {
+
+        // TODO Currently we need to check if a pairing is not already running
+        //  since there can only be one pairing at a time at the time of this writing.
+        //  This needs to be addressed.
+        if (pairing == activePairing)
+            throw new PairingNotFinishedException();
+
+        if (!finishedPairings.contains(pairing))
+            throw new NoSuchPairingException();
+
+        if (!entrants.contains(pairing.getEntrant1()) || !entrants.contains(pairing.getEntrant2()))
+            throw new MissingEntrantException();
+
+        try {
+            resetEntrant(pairing.getEntrant1());
+            resetEntrant(pairing.getEntrant2());
+        } catch (NoSuchEntrantException e) {
+            throw new RuntimeException(e);
+        }
+
+        finishedPairings.remove(pairing);
+        activePairing = pairing;
+    }
+
     @Override
     public void declareWinner(Entrant entrant) throws NoSuchEntrantException, MissingPairingException {
         if (!entrants.contains(entrant))

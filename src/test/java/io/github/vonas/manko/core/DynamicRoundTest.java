@@ -187,4 +187,21 @@ class DynamicRoundTest {
         round.resetEntrant(entrantA);
         assertEquals(1, round.getPendingEntrants().size());
     }
+
+    @Test
+    void finishedPairing_removeEntrantAndRedoPairing_throwsMissingEntrantException() throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.declareWinner(winner);
+        twoEntrantRound.removeEntrant(winner);
+        assertThrows(MissingEntrantException.class, () -> twoEntrantRound.redoPairing(pairing));
+    }
+
+    @Test
+    void finishedPairing_redoPairing_pairingBecomesActive() throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.declareWinner(winner);
+        twoEntrantRound.redoPairing(pairing);
+        assertEquals(twoEntrantRound.activePairing, pairing);
+        assertTrue(twoEntrantRound.getFinishedPairings().isEmpty());
+    }
 }
