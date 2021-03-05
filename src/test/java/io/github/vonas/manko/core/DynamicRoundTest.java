@@ -204,4 +204,13 @@ class DynamicRoundTest {
         assertEquals(twoEntrantRound.activePairing, pairing);
         assertTrue(twoEntrantRound.getFinishedPairings().isEmpty());
     }
+
+    @Test
+    void finishedPairing_passEqualButNonIdenticalPairingToRedo_redoesFinishedPairing() throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        Pairing equalPairing = new Pairing(pairing.getEntrant1(), pairing.getEntrant2());
+        twoEntrantRound.declareWinner(winner);
+        twoEntrantRound.redoPairing(equalPairing);
+        assertTrue(twoEntrantRound.getFinishedPairings().isEmpty());
+    }
 }
