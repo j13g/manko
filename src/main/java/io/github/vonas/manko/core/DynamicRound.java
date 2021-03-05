@@ -89,6 +89,9 @@ public class DynamicRound extends Round {
         // Add the other entrant of which the opponent
         // was removed to the list of pending entrants.
         pendingEntrants.add(other);
+
+        // Destroy the active pairing.
+        activePairing = null;
     }
 
     @Override

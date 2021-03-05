@@ -189,6 +189,13 @@ class DynamicRoundTest {
     }
 
     @Test
+    void activePairing_removeEntrant_noActivePairing() throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.removeEntrant(entrantA);
+        assertNull(twoEntrantRound.activePairing);
+    }
+
+    @Test
     void finishedPairing_removeEntrantAndRedoPairing_throwsMissingEntrantException() throws Exception {
         Pairing pairing = twoEntrantRound.nextPairing();
         twoEntrantRound.declareWinner(winner);
