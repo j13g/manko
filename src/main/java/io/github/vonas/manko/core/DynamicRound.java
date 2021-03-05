@@ -54,11 +54,8 @@ public class DynamicRound extends Round {
         if (!entrants.contains(entrant))
             throw new NoSuchEntrantException();
 
-        if (!isPending(entrant))
-            pendingEntrants.add(entrant);
-
-        advancedEntrants.remove(entrant);
-        eliminatedEntrants.remove(entrant);
+        removeEntrant(entrant);
+        addEntrant(entrant);
     }
 
     @Override

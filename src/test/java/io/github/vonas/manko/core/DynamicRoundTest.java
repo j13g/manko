@@ -23,11 +23,14 @@ class DynamicRoundTest {
 
     private DynamicRound round;
     private DynamicRound twoEntrantRound;
+    private DynamicRound fourEntrantRound;
 
     @BeforeEach
     void init() {
         round = new DynamicRound();
         twoEntrantRound = new DynamicRound(new HashSet<>(Arrays.asList(entrantA, entrantB)));
+        fourEntrantRound = new DynamicRound(new HashSet<>(
+            Arrays.asList(entrantA, entrantB, TestEntrant.createUnique(), TestEntrant.createUnique())));
     }
 
     // TODO Add test that checks if nextPairing()
@@ -202,6 +205,21 @@ class DynamicRoundTest {
         twoEntrantRound.declareWinner(winner);
         twoEntrantRound.removeEntrant(winner);
         assertThrows(MissingEntrantException.class, () -> twoEntrantRound.redoPairing(pairing));
+    }
+
+    @Test
+    void round_resetEntrant_identicalToRemoveAndAddEntrant() throws Exception {
+        Pairing pairing1 = fourEntrantRound.nextPairing();
+        fourEntrantRound.declareWinner(pairing1.getEntrant1());
+        Pairing pairing2 = fourEntrantRound.nextPairing();
+        DynamicRound snapshot = serializeDeserialize(fourEntrantRound, DynamicRound.class);
+
+        Entrant elected = pairing2.getEntrant1();
+        snapshot.removeEntrant(elected);
+        snapshot.addEntrant(elected);
+        fourEntrantRound.resetEntrant(elected);
+
+        assertEquals(snapshot, fourEntrantRound);
     }
 
     @Test
