@@ -133,6 +133,13 @@ public class DynamicRound extends Round {
             throw new RuntimeException(e);
         }
 
+        // resetEntrant adds the entrants back to the end of
+        // the pendingEntrants array. We need to remove them again.
+        assert pendingEntrants.get(pendingEntrants.size() - 1).equals(pairing.getEntrant2());
+        assert pendingEntrants.get(pendingEntrants.size() - 2).equals(pairing.getEntrant1());
+        pendingEntrants.remove(pendingEntrants.size() - 1);
+        pendingEntrants.remove(pendingEntrants.size() - 1);
+
         finishedPairings.remove(pairing);
         activePairing = pairing;
     }

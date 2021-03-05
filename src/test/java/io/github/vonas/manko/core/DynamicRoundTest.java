@@ -220,4 +220,12 @@ class DynamicRoundTest {
         twoEntrantRound.redoPairing(equalPairing);
         assertTrue(twoEntrantRound.getFinishedPairings().isEmpty());
     }
+
+    @Test
+    void finishedPairing_redoPairing_entrantsNotPending() throws Exception {
+        Pairing pairing = twoEntrantRound.nextPairing();
+        twoEntrantRound.declareWinner(entrantA);
+        twoEntrantRound.redoPairing(pairing);
+        assertEquals(0, twoEntrantRound.getPendingEntrants().size());
+    }
 }
