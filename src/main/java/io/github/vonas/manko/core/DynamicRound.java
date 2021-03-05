@@ -207,7 +207,10 @@ public class DynamicRound extends Round {
         // Since pendingEntrants is an array, it's faster to check if
         // the entrant has not advanced or wasn't eliminated yet,
         // since the containers holding those entrants are sets.
-        boolean result = !advancedEntrants.contains(entrant) && !eliminatedEntrants.contains(entrant);
+        boolean result = !advancedEntrants.contains(entrant)
+            && !eliminatedEntrants.contains(entrant)
+            && (activePairing == null || !activePairing.hasEntrant(entrant));
+
         assert result == pendingEntrants.contains(entrant);
         return result;
     }
