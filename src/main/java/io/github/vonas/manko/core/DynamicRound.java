@@ -52,7 +52,8 @@ public class DynamicRound extends Round {
         advancedEntrants.remove(entrant);
         eliminatedEntrants.remove(entrant);
 
-        pendingEntrants.add(entrant);
+        if (!isPending(entrant))
+            pendingEntrants.add(entrant);
     }
 
     @Override
@@ -148,6 +149,20 @@ public class DynamicRound extends Round {
     @Override
     public boolean isEliminated(Entrant entrant) {
         return eliminatedEntrants.contains(entrant);
+    }
+
+    /**
+     * Checks if an entrant is waiting for a pairing.
+     * @param entrant The entrant.
+     * @return If the entrant is pending.
+     */
+    public boolean isPending(Entrant entrant) {
+        // Since pendingEntrants is an array, it's faster to check if
+        // the entrant has not advanced or wasn't eliminated yet,
+        // since the containers holding those entrants are sets.
+        boolean result = !advancedEntrants.contains(entrant) && !eliminatedEntrants.contains(entrant);
+        assert result == pendingEntrants.contains(entrant);
+        return result;
     }
 
     /**

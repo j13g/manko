@@ -180,4 +180,11 @@ class DynamicRoundTest {
         twoEntrantRound.resetEntrant(loser);
         assertEquals(finishedPairings, twoEntrantRound.getFinishedPairings());
     }
+
+    @Test
+    void pendingEntrant_resetPendingEntrant_noDuplicatePendingEntrant() throws Exception {
+        round.addEntrant(entrantA);
+        round.resetEntrant(entrantA);
+        assertEquals(1, round.getPendingEntrants().size());
+    }
 }
