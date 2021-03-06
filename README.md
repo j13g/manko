@@ -135,6 +135,12 @@ Jeder Befehl nimmt sich die Daten aus der Datenbank,
 welcher er benötigt, macht seine Arbeit
 und speichert den neuen Zustand direkt im Anschluss ab.
 
+## Diagramme
+
+### Sequenzdiagramm eines Teilnehmers
+
+![sequence-diagram-entrant](docs/sequence-entrant.jpg)
+
 ## Befehle
 
 Solche Befehle, welche kritische Aktionen durchführen,
@@ -258,6 +264,12 @@ oder der letzte Spieler entfernt werden muss.
 Bei weniger als vier Spielern
 werden entsprechend die Finalrunden eingeleitet.
 
+```
+/t:pair <Player1> <Player2>
+```
+Erstelle eine manuelle Paarung zwischen zwei Spielern.
+Die beiden Spieler dürfen jeweils nicht in einer Paarung vorgekommen sein
+oder aktuell in einer aktiven Paarung sein.
 
 #### Gewinner bestimmen
 
@@ -269,10 +281,12 @@ Deklariert den Gewinner einer aktuell laufenden Paarung.
 #### Spieler zurücksetzen
 
 ```
-/t:reset <Player1> [<Player2> [..]]  (y/n)
+/t:reset <Player>  (y/n)
 ```
-Setzt einen oder mehrere Teilnehmer auf den Ursprungszustand zurück.
-Äquivalent dazu, diese erst zu entfernen und dann wieder hinzuzufügen.
+Setzt einen Teilnehmer auf den Ursprungszustand zurück.
+(Äquivalent dazu, diesen erst zu entfernen und dann wieder hinzuzufügen).
+Wird jemand zurückgesetzt, welcher zuvor eine Paarung beendet hat,
+dann wird der Gegner nicht zurückgesetzt.
 
 ```
 /t:repair <Player1> <Player2>

@@ -1,23 +1,24 @@
 package io.github.vonas.manko.fabric;
 
 import com.mojang.brigadier.context.CommandContext;
-import io.github.vonas.manko.core.Entrant;
-import io.github.vonas.manko.exceptions.MissingPlayerException;
+import io.github.vonas.manko.fabric.exceptions.MissingPlayerException;
 import io.github.vonas.manko.mixin.EntitySelectorAccessor;
+import io.github.vonas.manko.util.Identifiable;
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.command.EntitySelector;
 
 import java.util.UUID;
 
-public class Player extends Entrant {
+public class Player extends Identifiable<UUID> {
 
     private final UUID uuid;
-    private final String displayName;
+    private final String name;
 
-    public Player(UUID uuid, String displayName) {
+    public Player(UUID uuid, String name) {
+        super(uuid);
         this.uuid = uuid;
-        this.displayName = displayName;
+        this.name = name;
     }
 
     public static Player fromEntitySelector(CommandContext<FabricClientCommandSource> context,
@@ -46,7 +47,7 @@ public class Player extends Entrant {
         return uuid;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getName() {
+        return name;
     }
 }

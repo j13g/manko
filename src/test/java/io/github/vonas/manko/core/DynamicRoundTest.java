@@ -1,260 +1,343 @@
 package io.github.vonas.manko.core;
 
-import io.github.vonas.manko.exceptions.*;
-import io.github.vonas.manko.util.TestEntrant;
+import io.github.vonas.manko.core.exceptions.MissingPairingException;
+import io.github.vonas.manko.core.exceptions.NoEntrantsException;
+import io.github.vonas.manko.core.exceptions.NoOpponentException;
+import io.github.vonas.manko.core.exceptions.NoSuchEntrantException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
 
-import static io.github.vonas.manko.core.SerializableTest.serializeDeserialize;
+import static io.github.vonas.manko.Helper.assertSuppliesAll;
 import static org.junit.jupiter.api.Assertions.*;
 
-class DynamicRoundTest {
+public class DynamicRoundTest {
 
-    private final Entrant entrantA = TestEntrant.createUnique();
-    private final Entrant entrantB = TestEntrant.createUnique();
-    private final Entrant invalidEntrant = TestEntrant.createUnique();
+    private final Random random = new Random(0);
 
-    private final Entrant winner = entrantA;
-    private final Entrant loser = entrantB;
+    private final TestEntrant first = createEntrant();
+    private final TestEntrant second = createEntrant();
+    private final TestEntrant invalidEntrant = createEntrant();
 
-    private DynamicRound round;
-    private DynamicRound twoEntrantRound;
-    private DynamicRound fourEntrantRound;
+    private final Set<TestEntrant> entrants = new HashSet<>(Arrays.asList(
+        first, second,
+        createEntrant(), createEntrant(), createEntrant(), createEntrant(),
+        createEntrant(), createEntrant(), createEntrant(), createEntrant()
+    ));
+
+    private final TestEntrant winner = first;
+    private final TestEntrant loser = second;
+
+    private DynamicRound<TestEntrant> emptyRound;
+    private DynamicRound<TestEntrant> oneEntrantRound;
+    private DynamicRound<TestEntrant> twoEntrantRound;
+    private DynamicRound<TestEntrant> multiEntrantRound;
+
+    private DynamicRound<TestEntrant> singlePairRound;
+    private DynamicRound<TestEntrant> singlePairFinishedRound;
 
     @BeforeEach
     void init() {
-        round = new DynamicRound();
-        twoEntrantRound = new DynamicRound(new HashSet<>(Arrays.asList(entrantA, entrantB)));
-        fourEntrantRound = new DynamicRound(new HashSet<>(
-            Arrays.asList(entrantA, entrantB, TestEntrant.createUnique(), TestEntrant.createUnique())));
+        emptyRound = new DynamicRound<>();
+
+        oneEntrantRound = new DynamicRound<>();
+        oneEntrantRound.add(first);
+
+        twoEntrantRound = new DynamicRound<>();
+        twoEntrantRound.add(first);
+        twoEntrantRound.add(second);
+
+        multiEntrantRound = createMultiEntrantRound();
+
+        singlePairRound = new DynamicRound<>();
+        singlePairRound.add(first);
+        singlePairRound.add(second);
+        assertDoesNotThrow(() -> singlePairRound.pairRandom());
+
+        singlePairFinishedRound = createSinglePairFinishedRound();
     }
 
-    // TODO Add test that checks if nextPairing()
-    //  shuffles the remaining pending entrants.
+    private TestEntrant createEntrant() {
+        return new TestEntrant(random.nextInt());
+    }
+
+    private DynamicRound<TestEntrant> createMultiEntrantRound() {
+        DynamicRound<TestEntrant> round = new DynamicRound<>();
+        for (TestEntrant entrant : entrants)
+            round.add(entrant);
+        return round;
+    }
+
+    private DynamicRound<TestEntrant> createSinglePairFinishedRound() {
+        DynamicRound<TestEntrant> round = new DynamicRound<>();
+        round.add(first);
+        round.add(second);
+        assertDoesNotThrow(round::pairRandom);
+        round.declareWinner(first);
+        return round;
+    }
+
+    // add()
 
     @Test
-    void noEntrants_addEntrant_isPending() {
-        round.addEntrant(entrantA);
-        List<Entrant> pendingEntrants = round.getPendingEntrants();
-        assertEquals(1, pendingEntrants.size());
-        assertEquals(entrantA, pendingEntrants.get(0));
+    void emptyRound_addEntrant_returnsTrue() {
+        assertTrue(emptyRound.add(first));
     }
 
     @Test
-    void noEntrants_nextPairing_throwsNoEntrants() {
-        assertThrows(NoEntrantsException.class, () -> round.nextPairing());
+    void oneEntrantRound_addEntrantAgain_returnsFalse() {
+        assertFalse(oneEntrantRound.add(first));
     }
 
     @Test
-    void oneEntrant_nextPairing_throwsNoOpponent() {
-        round.addEntrant(entrantA);
-        assertThrows(NoOpponentException.class, () -> round.nextPairing());
+    void emptyRound_addEntrant_isPending() {
+        emptyRound.add(first);
+        assertTrue(emptyRound.isPending(first));
     }
 
     @Test
-    void twoEntrants_nextPairing_noPendingEntrants() throws Exception {
-        twoEntrantRound.nextPairing();
+    void singlePairFinishedRound_removeAdvancedThenAddBack_isAdvanced() {
+        singlePairFinishedRound.remove(winner);
+        singlePairFinishedRound.add(winner);
+        assertTrue(singlePairFinishedRound.isAdvanced(winner));
+        assertFalse(singlePairFinishedRound.isPending(winner));
+    }
+
+    // pairRandom()
+
+    @Test
+    void emptyRound_pairRandom_throwsNoEntrantsException() {
+        assertThrows(NoEntrantsException.class, () -> emptyRound.pairRandom());
+    }
+
+    @Test
+    void oneEntrantRound_pairRandom_throwsNoOpponentException() {
+        assertThrows(NoOpponentException.class, () -> oneEntrantRound.pairRandom());
+    }
+
+    @Test
+    void twoEntrantRound_pairRandom_noPendingEntrants() {
+        twoEntrantRound.pairRandom();
         assertTrue(twoEntrantRound.getPendingEntrants().isEmpty());
     }
 
     @Test
-    void twoEntrants_nextPairing_returnsBothEntrants() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        Entrant first = pairing.getEntrant1();
-        Entrant second = pairing.getEntrant2();
-        if (first != entrantA) {
-            Entrant tmp = first;
-            first = second;
-            second = tmp;
-        }
-        assertEquals(entrantA, first);
-        assertEquals(entrantB, second);
+    void twoEntrantRound_pairRandom_bothEntrantsArePaired() {
+        assertDoesNotThrow(twoEntrantRound::pairRandom);
+        assertFalse(twoEntrantRound.isPending(first));
+        assertFalse(twoEntrantRound.isPending(second));
+        assertTrue(twoEntrantRound.isPaired(first));
+        assertTrue(twoEntrantRound.isPaired(second));
     }
 
     @Test
-    void twoEntrants_nextPairing_updatesCurrentPairing() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        assertTrue(twoEntrantRound.hasActivePairing());
-        assertEquals(pairing, twoEntrantRound.getActivePairing());
+    void twoEntrantRound_pairRandom_returnedPairingContainsBothEntrants() {
+        Pairing<TestEntrant> pairing = twoEntrantRound.pairRandom();
+        assertTrue(pairing.contains(first));
+        assertTrue(pairing.contains(second));
     }
 
     @Test
-    void pairing_declareInvalidEntrantAsWinner_throwsNoSuchEntrant() throws Exception {
-        twoEntrantRound.nextPairing();
-        assertThrows(NoSuchEntrantException.class, () -> twoEntrantRound.declareWinner(invalidEntrant));
+    void singlePairFinishedRound_resetPairedEntrantsAndPairRandomAgain_entrantsArePaired() {
+        singlePairFinishedRound.reset(winner);
+        singlePairFinishedRound.reset(loser);
+        assertDoesNotThrow(singlePairFinishedRound::pairRandom);
+        assertTrue(singlePairFinishedRound.isPaired(winner));
+        assertTrue(singlePairFinishedRound.isPaired(loser));
+    }
+
+    // declareWinner()
+
+    @Test
+    void emptyRound_declareWinner_throwsNoSuchEntrantException() {
+        assertThrows(NoSuchEntrantException.class, () -> emptyRound.declareWinner(winner));
     }
 
     @Test
-    void noPairing_declareWinner_throwsMissingPairing() {
-        assertThrows(MissingPairingException.class, () -> twoEntrantRound.declareWinner(entrantA));
+    void oneEntrantRound_declareWinner_throwsMissingPairingException() {
+        assertThrows(MissingPairingException.class, () -> oneEntrantRound.declareWinner(winner));
     }
 
     @Test
-    void pairing_declareWinner_winnerAdvancesAndLoserEliminated() throws Exception {
-        twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        Set<Entrant> advancedEntrants = twoEntrantRound.getAdvancedEntrants();
-        Set<Entrant> eliminatedEntrants = twoEntrantRound.getEliminatedEntrants();
-        assertEquals(1, advancedEntrants.size());
-        assertEquals(1, eliminatedEntrants.size());
-        assertTrue(advancedEntrants.contains(winner));
-        assertTrue(eliminatedEntrants.contains(loser));
+    void singlePairRound_declareFirstWinner_winnerAdvancedAndLoserEliminated() {
+        singlePairRound.declareWinner(winner);
+        assertFalse(singlePairRound.isPaired(winner));
+        assertFalse(singlePairRound.isPaired(loser));
+        assertTrue(singlePairRound.isAdvanced(winner));
+        assertTrue(singlePairRound.isEliminated(loser));
     }
 
     @Test
-    void pairing_declareWinner_pairingFinished() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        Set<Pairing> finishedPairings = twoEntrantRound.getFinishedPairings();
-        assertTrue(finishedPairings.contains(pairing));
-        assertEquals(1, finishedPairings.size());
+    void singlePairRound_declareWinner_returnsFinishedPairing() {
+        Pairing<TestEntrant> expectedPairing = twoEntrantRound.pairRandom();
+        Pairing<TestEntrant> finishedPairing = twoEntrantRound.declareWinner(winner);
+        assertSame(expectedPairing, finishedPairing);
     }
 
     @Test
-    void twoEntrants_declareWinner_roundFinished() throws Exception {
-        twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        assertTrue(twoEntrantRound.isFinished());
+    void singlePairRound_declareWinner_pairingFinished() {
+        Pairing<TestEntrant> pairing = singlePairRound.declareWinner(winner);
+        assertTrue(singlePairRound.getFinishedPairings().contains(pairing));
     }
 
     @Test
-    void oneEntrant_removeEntrant_noEntrants() {
-        round.addEntrant(entrantA);
-        round.removeEntrant(entrantA);
-        assertTrue(round.getEntrants().isEmpty());
+    void multiPairRound_declareAllWinners_finishedPairingsAreOrderedChronologically() {
+        assert true; // TODO
+    }
+
+    // reset()
+
+    @Test
+    void singleEntrantRound_resetEntrant_isPending() {
+        singlePairRound.reset(first);
+        assertTrue(singlePairRound.isPending(first));
     }
 
     @Test
-    void pairingPending_removeOneEntrant_otherEntrantPending() throws Exception {
-        twoEntrantRound.nextPairing();
-        twoEntrantRound.removeEntrant(entrantA);
-        assertTrue(twoEntrantRound.getPendingEntrants().contains(entrantB));
+    void singleEntrantRound_resetInvalidEntrant_returnsFalse() {
+        assertFalse(singlePairRound.reset(invalidEntrant));
+        assertFalse(singlePairRound.isPending(invalidEntrant));
     }
 
     @Test
-    void finishedRound_removeAllEntrants_noEntrants() throws Exception {
-        twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(entrantA);
-        twoEntrantRound.removeEntrant(entrantA);
-        twoEntrantRound.removeEntrant(entrantB);
-        assertEquals(0, twoEntrantRound.getEntrants().size());
-        assertEquals(0, twoEntrantRound.getPendingEntrants().size());
-        assertEquals(0, twoEntrantRound.getAdvancedEntrants().size());
-        assertEquals(0, twoEntrantRound.getEliminatedEntrants().size());
-        assertEquals(0, twoEntrantRound.getFinishedPairings().size());
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {0, 1})
-    void finishedRound_removeOneEntrant_keepAllPairings(int e) throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        twoEntrantRound.removeEntrant(e == 0 ? entrantA : entrantB);
-        assertEquals(1, twoEntrantRound.getFinishedPairings().size());
+    void singlePairRound_resetFirst_isPending() {
+        singlePairRound.reset(first);
+        assertTrue(singlePairRound.isPending(first));
+        assertFalse(singlePairRound.isPaired(first));
     }
 
     @Test
-    void eliminatedEntrant_resetEliminated_eliminatedPending() throws Exception {
-        twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        twoEntrantRound.resetEntrant(loser);
-        assertTrue(twoEntrantRound.getEliminatedEntrants().isEmpty());
-        assertTrue(twoEntrantRound.getPendingEntrants().contains(loser));
+    void singlePairRound_resetFirst_secondIsPending() {
+        singlePairRound.reset(second);
+        assertTrue(singlePairRound.isPending(second));
+        assertFalse(singlePairRound.isPaired(second));
     }
 
     @Test
-    void loserRemoved_resetWinner_pastPairingExists() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        twoEntrantRound.removeEntrant(loser);
-        twoEntrantRound.resetEntrant(winner);
-        assertFalse(twoEntrantRound.getFinishedPairings().isEmpty());
+    void singlePairFinishedRound_resetAdvanced_isPending() {
+        singlePairFinishedRound.reset(winner);
+        assertFalse(singlePairFinishedRound.isAdvanced(winner));
+        assertTrue(singlePairFinishedRound.isPending(winner));
     }
 
     @Test
-    void finishedRound_resetAll_previousPairingsUnchanged() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        Set<Pairing> finishedPairings = twoEntrantRound.getFinishedPairings();
-        twoEntrantRound.resetEntrant(winner);
-        twoEntrantRound.resetEntrant(loser);
-        assertEquals(finishedPairings, twoEntrantRound.getFinishedPairings());
+    void singlePairFinishedRound_resetAdvanced_eliminatedIsStillEliminated() {
+        singlePairFinishedRound.reset(winner);
+        assertTrue(singlePairFinishedRound.isEliminated(loser));
     }
 
     @Test
-    void pendingEntrant_resetPendingEntrant_noDuplicatePendingEntrant() throws Exception {
-        round.addEntrant(entrantA);
-        round.resetEntrant(entrantA);
-        assertEquals(1, round.getPendingEntrants().size());
+    void singlePairFinishedRound_resetFloatingAdvanced_isCompletelyRemoved() {
+        singlePairFinishedRound.remove(winner);
+        singlePairFinishedRound.reset(winner);
+        assertFalse(singlePairFinishedRound.contains(winner));
+        assertFalse(singlePairFinishedRound.isAdvanced(winner));
     }
 
     @Test
-    void activePairing_removeEntrant_noActivePairing() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.removeEntrant(entrantA);
-        assertNull(twoEntrantRound.activePairing);
+    void singlePairFinishedRound_resetAdvanced_keepsFinishedPairing() {
+        singlePairFinishedRound.reset(winner);
+        assertEquals(1, singlePairFinishedRound.getFinishedPairings().size());
     }
 
     @Test
-    void finishedPairing_removeEntrantAndRedoPairing_throwsMissingEntrantException() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        twoEntrantRound.removeEntrant(winner);
-        assertThrows(MissingEntrantException.class, () -> twoEntrantRound.redoPairing(pairing));
+    void singlePairFinishedRound_resetAdvancedAndEliminated_removesFinishedPairing() {
+        singlePairFinishedRound.reset(winner);
+        singlePairFinishedRound.reset(loser);
+        assertTrue(singlePairFinishedRound.getFinishedPairings().isEmpty());
     }
 
     @Test
-    void round_resetEntrant_identicalToRemoveAndAddEntrant() throws Exception {
-        Pairing pairing1 = fourEntrantRound.nextPairing();
-        fourEntrantRound.declareWinner(pairing1.getEntrant1());
-        Pairing pairing2 = fourEntrantRound.nextPairing();
-        DynamicRound snapshot = serializeDeserialize(fourEntrantRound, DynamicRound.class);
+    void singlePairFinishedRound_removeWinnerAndResetLoser_finishedPairingStillExists() {
+        singlePairFinishedRound.remove(winner);
+        singlePairFinishedRound.reset(loser);
+        assertEquals(1, singlePairFinishedRound.getFinishedPairings().size());
+    }
 
-        Entrant elected = pairing2.getEntrant1();
-        snapshot.removeEntrant(elected);
-        snapshot.addEntrant(elected);
-        fourEntrantRound.resetEntrant(elected);
+    // remove()
 
-        assertEquals(snapshot, fourEntrantRound);
+    @Test
+    void singlePairRound_removeFirst_isRemoved() {
+        singlePairRound.remove(first);
+        assertFalse(singlePairRound.contains(first));
+        assertFalse(singlePairRound.isPending(first));
+        assertFalse(singlePairRound.isPaired(first));
     }
 
     @Test
-    void finishedPairing_redoPairing_pairingBecomesActive() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        twoEntrantRound.redoPairing(pairing);
-        assertEquals(twoEntrantRound.activePairing, pairing);
-        assertTrue(twoEntrantRound.getFinishedPairings().isEmpty());
+    void singlePairRound_removeFirst_secondIsPending() {
+        singlePairRound.remove(first);
+        assertTrue(singlePairRound.isPending(second));
+        assertFalse(singlePairRound.isPaired(second));
     }
 
     @Test
-    void finishedPairing_passEqualButNonIdenticalPairingToRedo_redoesFinishedPairing() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        Pairing equalPairing = new Pairing(pairing.getEntrant1(), pairing.getEntrant2());
-        twoEntrantRound.declareWinner(winner);
-        twoEntrantRound.redoPairing(equalPairing);
-        assertTrue(twoEntrantRound.getFinishedPairings().isEmpty());
+    void singlePairFinishedRound_removeAdvanced_isRemoved() {
+        assertTrue(singlePairFinishedRound.remove(winner));
+        assertFalse(singlePairFinishedRound.contains(winner));
     }
 
     @Test
-    void finishedPairing_redoPairing_entrantsNotPending() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(entrantA);
-        twoEntrantRound.redoPairing(pairing);
-        assertEquals(0, twoEntrantRound.getPendingEntrants().size());
+    void singlePairFinishedRound_removeAndResetAllEntrants_completelyEmptyRound() {
+        singlePairFinishedRound.remove(first);
+        singlePairFinishedRound.remove(second);
+        singlePairFinishedRound.reset(first);
+        singlePairFinishedRound.reset(second);
+        assertFalse(singlePairFinishedRound.hasStateAbout(first));
+        assertFalse(singlePairFinishedRound.hasStateAbout(second));
+        assertTrue(singlePairFinishedRound.getPendingEntrants().isEmpty());
+    }
+
+    // isFinished()
+
+    @Test
+    void singlePairFinishedRound_isFinished_returnsTrue() {
+        assertTrue(singlePairFinishedRound.isFinished());
     }
 
     @Test
-    void finishedPairing_redoRepeatFinishPairing_identicalOutcomes() throws Exception {
-        Pairing pairing = twoEntrantRound.nextPairing();
-        twoEntrantRound.declareWinner(winner);
-        DynamicRound snapshot = serializeDeserialize(twoEntrantRound, DynamicRound.class);
-        twoEntrantRound.redoPairing(pairing);
-        twoEntrantRound.declareWinner(winner);
-        assertEquals(snapshot, twoEntrantRound);
+    void singlePairRound_isFinished_returnsFalse() {
+        // The round is not finished since there is an active pairing.
+        assertFalse(singlePairRound.isFinished());
+        assertTrue(singlePairRound.hasActivePairings());
+    }
+
+    @Test
+    void singlePairFinishedRound_removeAdvanced_isStillFinished() {
+        singlePairFinishedRound.remove(winner);
+        assertTrue(singlePairFinishedRound.isFinished());
+    }
+
+    // Identities
+
+    @Test
+    void singlePairFinishedRound_resetThenRemoveAdvanced_identicalToRemoveThenResetAdvanced() {
+        DynamicRound<TestEntrant> otherRound = createSinglePairFinishedRound();
+
+        singlePairFinishedRound.reset(winner);
+        singlePairFinishedRound.remove(winner);
+        otherRound.remove(winner);
+        otherRound.reset(winner);
+
+        assertEquals(singlePairFinishedRound.contains(winner), otherRound.contains(winner));
+        assertEquals(singlePairFinishedRound.hasStateAbout(winner), otherRound.hasStateAbout(winner));
+    }
+
+    // Miscellaneous
+
+    @Test
+    void testEntrants_uniqueIds() {
+        List<Integer> ids = Arrays.asList(first.id(), second.id(), invalidEntrant.id());
+        assertEquals(ids.size(), new HashSet<>(ids).size());
+    }
+
+    @Test
+    void multiEntrantRound_pairRandom_isRandom() {
+        assertSuppliesAll(entrants, () -> {
+            DynamicRound<TestEntrant> round = createMultiEntrantRound();
+            Pairing<TestEntrant> pairing = round.pairRandom();
+            return pairing.getEntrant1();
+        });
     }
 }

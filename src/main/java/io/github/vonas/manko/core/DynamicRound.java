@@ -1,261 +1,281 @@
 package io.github.vonas.manko.core;
 
-import io.github.vonas.manko.exceptions.*;
+import io.github.vonas.manko.core.exceptions.MissingPairingException;
+import io.github.vonas.manko.core.exceptions.NoEntrantsException;
+import io.github.vonas.manko.core.exceptions.NoOpponentException;
+import io.github.vonas.manko.core.exceptions.NoSuchEntrantException;
+import io.github.vonas.manko.util.ShuffledSet;
+import io.github.vonas.manko.util.UniformPairUniqueBiSet;
+import io.github.vonas.manko.util.UniformPairUniqueLinkedBiSet;
+import io.github.vonas.manko.util.exceptions.EmptySetException;
+import io.github.vonas.manko.util.exceptions.NoSuchElementException;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.*;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
-public class DynamicRound extends Round {
+public class DynamicRound<E extends Serializable> implements Serializable {
 
-    /**
-     * Holds the entrants that have not yet appeared in a pairing.
-     */
-    private final ArrayList<Entrant> pendingEntrants = new ArrayList<>();
-    private transient Random random;
+    private final HashSet<E> entrants = new HashSet<>();
+    private final ShuffledSet<E> pendingEntrants = new ShuffledSet<>();
 
-    private final HashSet<Entrant> advancedEntrants = new HashSet<>();
-    private final HashSet<Entrant> eliminatedEntrants = new HashSet<>();
+    private final Results<E> results = new Results<>();
+    private final Results<E> floatingResults = new Results<>();
 
-    /**
-     * Creates a new round for a tournament. No entrants are known in advance.
-     * This is the default for the first round of a dynamic tournament.
-     */
-    public DynamicRound() {
-        initTransient();
+    private final UniformPairUniqueBiSet<E, Pairing<E>> activePairings = new UniformPairUniqueBiSet<>();
+    private final UniformPairUniqueLinkedBiSet<E, Pairing<E>> finishedPairings = new UniformPairUniqueLinkedBiSet<>();
+
+    public DynamicRound() {}
+
+    public DynamicRound(Set<E> entrants) {
+        entrants.forEach(this::add);
     }
 
     /**
-     * Creates a new round for a tournament with initial entrants.
-     * @param entrants The initial entrants.
-     */
-    public DynamicRound(Set<Entrant> entrants) {
-        this();
-        for (Entrant entrant : entrants)
-            this.addEntrant(entrant);
-    }
-
-    /**
-     * Add a new entrant to this round.
+     * Add an entrant to this round.
      * @param entrant The entrant.
+     * @return If the entrant was not already in this round.
      */
-    public void addEntrant(Entrant entrant) {
+    public boolean add(E entrant) {
+        if (entrants.contains(entrant))
+            return false;
+
+        if (floatingResults.contains(entrant)) {
+            floatingResults.moveTo(results, entrant);
+            return true;
+        }
+
         entrants.add(entrant);
         pendingEntrants.add(entrant);
+        return true;
     }
+
+    // TODO
+//    public Pairing<E> pair(E entrant1, E entrant2) {
+//        if (!contains(entrant1) || !contains(entrant2))
+//            throw new NoSuchEntrantException();
+//
+//        if (!isPending(entrant1) || !isPending(entrant2))
+//            throw new EntrantNotPendingException();
+//    }
 
     /**
-     * Resets an entrant to its initial state.
-     * Previous pairings will not be removed.
-     * @param entrant The entrant.
-     * @throws NoSuchEntrantException The entrant is not part of this round.
+     * Creates a pairing between two randomly chosen entrants.
+     * @return The created pairing.
+     * @throws NoEntrantsException The round does not have any entrants.
+     * @throws NoOpponentException The only entrant does not have an opponent.
      */
-    public void resetEntrant(Entrant entrant) throws NoSuchEntrantException {
-        if (!entrants.contains(entrant))
-            throw new NoSuchEntrantException();
-
-        // TODO Verify this.
-        // Already where we want the entrant to be.
-        if (isPending(entrant))
-            return;
-
-        removeEntrant(entrant);
-        addEntrant(entrant);
-    }
-
-    @Override
-    public void removeEntrant(Entrant entrant) {
-        if (!entrants.contains(entrant))
-            return;
-
-        entrants.remove(entrant);
-        advancedEntrants.remove(entrant);
-        eliminatedEntrants.remove(entrant);
-
-        // The linear time penalty and shifting (copying)
-        // elements to their new positions should be fine,
-        // as entrants will not be deleted that frequently.
-        pendingEntrants.remove(entrant);
-
-        // TODO Don't remove anything from finishedPairings. Make it an array.
-        // Remove all pairings where no entrant is part of this round anymore.
-        finishedPairings.removeIf(pairing ->
-            !entrants.contains(pairing.getEntrant1()) && !entrants.contains(pairing.getEntrant2()));
-
-        if (!hasActivePairing()) return;
-        if (!activePairing.hasEntrant(entrant))
-            return;
-
-        Entrant other;
-        try {
-            other = activePairing.otherEntrant(entrant);
-        }
-        catch (NoSuchEntrantException e) {
-            throw new RuntimeException(e);
-        }
-
-        // Add the other entrant of which the opponent
-        // was removed to the list of pending entrants.
-        pendingEntrants.add(other);
-
-        // Destroy the active pairing.
-        activePairing = null;
-    }
-
-    @Override
-    public Pairing nextPairing() throws NoEntrantsException, NoOpponentException {
+    public Pairing<E> pairRandom() throws NoEntrantsException, NoOpponentException {
         if (pendingEntrants.size() == 0) throw new NoEntrantsException();
         if (pendingEntrants.size() == 1) throw new NoOpponentException();
 
-        Entrant first = popRandomPendingEntrant();
-        Entrant second = popRandomPendingEntrant();
-
-        activePairing = new Pairing(first, second);
-        return activePairing;
-    }
-
-    /**
-     * Resets a pairing to the state before the winner was declared.
-     * The entrants of the pairing are reset and the pairing becomes the active pairing.
-     * @param pairing The pairing.
-     */
-    public void redoPairing(Pairing pairing)
-            throws PairingNotFinishedException, NoSuchPairingException, MissingEntrantException {
-
-        // TODO Currently we need to check if a pairing is not already running
-        //  since there can only be one pairing at a time at the time of this writing.
-        //  This needs to be addressed.
-        if (pairing == activePairing)
-            throw new PairingNotFinishedException();
-
-        if (!finishedPairings.contains(pairing))
-            throw new NoSuchPairingException();
-
-        if (!entrants.contains(pairing.getEntrant1()) || !entrants.contains(pairing.getEntrant2()))
-            throw new MissingEntrantException();
-
+        Pairing<E> pairing;
         try {
-            resetEntrant(pairing.getEntrant1());
-            resetEntrant(pairing.getEntrant2());
-        } catch (NoSuchEntrantException e) {
+            E entrant1 = pendingEntrants.removeRandom();
+            E entrant2 = pendingEntrants.removeRandom();
+            pairing = new Pairing<>(entrant1, entrant2);
+        }
+        catch (EmptySetException e) {
             throw new RuntimeException(e);
         }
 
-        // resetEntrant adds the entrants back to the end of
-        // the pendingEntrants array. We need to remove them again.
-        assert pendingEntrants.get(pendingEntrants.size() - 1).equals(pairing.getEntrant2());
-        assert pendingEntrants.get(pendingEntrants.size() - 2).equals(pairing.getEntrant1());
-        pendingEntrants.remove(pendingEntrants.size() - 1);
-        pendingEntrants.remove(pendingEntrants.size() - 1);
+        // A created pairing may not have been played before.
+        assert !finishedPairings.contains(pairing);
 
-        finishedPairings.remove(pairing);
-        activePairing = pairing;
+        activePairings.add(pairing);
+        return pairing;
     }
 
-    @Override
-    public void declareWinner(Entrant entrant) throws NoSuchEntrantException, MissingPairingException {
-        if (!entrants.contains(entrant))
+    /**
+     * Cancels a pairing, effectively resetting both entrants.
+     * @param pairing The pairing.
+     * @return If the pairing existed.
+     */
+    public boolean cancelPairing(Pairing<E> pairing) {
+        return reset(pairing.getEntrant1());
+    }
+
+    /**
+     * Cancels the pairing that the entrant is part of.
+     * @param entrant The entrant.
+     * @return If that pairing existed.
+     */
+    public boolean cancelPairingByEntrant(E entrant) {
+        return reset(entrant);
+    }
+
+    /**
+     * Declares the winner of an active pairing.
+     * @param entrant The winning entrant.
+     * @return The pairing this entrant was part of.
+     * @throws NoSuchEntrantException This entrant is not part of this round.
+     * @throws MissingPairingException This entrant is not part of any active pairing.
+     */
+    public Pairing<E> declareWinner(E entrant) throws NoSuchEntrantException, MissingPairingException {
+        if (!contains(entrant))
             throw new NoSuchEntrantException();
 
-        if (activePairing == null || !activePairing.hasEntrant(entrant))
+        Pairing<E> pairing = activePairings.findByElement(entrant);
+        if (pairing == null)
             throw new MissingPairingException();
 
-        // Categorize the entrants of the corresponding pairing.
-        advancedEntrants.add(entrant);
-        eliminatedEntrants.add(activePairing.otherEntrant(entrant));
+        results.advance(entrant);
+        results.eliminate(getOtherUnsafe(pairing, entrant));
 
-        // Add the pairing to the finished pairings.
-        finishedPairings.add(activePairing);
-        activePairing = null;
+        finishedPairings.add(pairing);
+        activePairings.remove(pairing);
 
-        // This invariant should always hold true.
-        assert pendingEntrants.size() + advancedEntrants.size()
-            + eliminatedEntrants.size() == entrants.size();
+        // Check that entrants don't end up where they shouldn't.
+        assert entrants.size() == 2 * activePairings.size() + 2 * finishedPairings.size() + pendingEntrants.size();
+        assert entrants.size() == 2 * activePairings.size() +
+            results.getAdvanced().size() + results.getEliminated().size() + pendingEntrants.size();
+
+        return pairing;
     }
 
     /**
-     * @return Entrants that have advanced to the next round.
-     */
-    public Set<Entrant> getAdvancedEntrants() {
-        return Collections.unmodifiableSet(advancedEntrants);
-    }
-
-    /**
-     * @return Entrants that were eliminated in a finished pairing.
-     */
-    public Set<Entrant> getEliminatedEntrants() {
-        // TODO: Decide for List or Set as storage container.
-        return Collections.unmodifiableSet(eliminatedEntrants);
-    }
-
-    /**
-     * @return Entrants that have not yet appeared in a previous pairing.
-     */
-    public List<Entrant> getPendingEntrants() {
-        return Collections.unmodifiableList(pendingEntrants);
-    }
-
-    @Override
-    public boolean isEliminated(Entrant entrant) {
-        return eliminatedEntrants.contains(entrant);
-    }
-
-    /**
-     * Checks if an entrant is waiting for a pairing.
+     * Resets an entrant back to the pending state.
      * @param entrant The entrant.
-     * @return If the entrant is pending.
+     * @return If the entrant was not already in pending state.
      */
-    public boolean isPending(Entrant entrant) {
-        // Since pendingEntrants is an array, it's faster to check if
-        // the entrant has not advanced or wasn't eliminated yet,
-        // since the containers holding those entrants are sets.
-        boolean result = !advancedEntrants.contains(entrant)
-            && !eliminatedEntrants.contains(entrant)
-            && (activePairing == null || !activePairing.hasEntrant(entrant));
-
-        assert result == pendingEntrants.contains(entrant);
-        return result;
-    }
-
-    /**
-     * Checks if the current round is finished.
-     * This is the case when there are no more pending entrants.
-     * @return If the current round is finished.
-     */
-    @Override
-    public boolean isFinished() {
-        return pendingEntrants.isEmpty();
-    }
-
-    private Entrant popRandomPendingEntrant() throws IndexOutOfBoundsException {
-        int index = random.nextInt(pendingEntrants.size());
-        int lastIndex = pendingEntrants.size() - 1;
-
-        Entrant declared = pendingEntrants.get(index);
-        pendingEntrants.set(index, pendingEntrants.get(lastIndex));
-        pendingEntrants.remove(lastIndex);
-
-        return declared;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DynamicRound))
+    public boolean reset(E entrant) {
+        if (!hasStateAbout(entrant) || isPending(entrant))
             return false;
 
-        DynamicRound other = (DynamicRound)o;
-        return pendingEntrants.equals(other.pendingEntrants)
-            && advancedEntrants.equals(other.advancedEntrants)
-            && eliminatedEntrants.equals(other.eliminatedEntrants);
+        if (isPaired(entrant)) {
+            Pairing<E> pairing = activePairings.removeByElement(entrant);
+            resetOtherUnsafe(pairing, entrant);
+            pendingEntrants.add(entrant);
+        }
+        else if (isAdvanced(entrant) || isEliminated(entrant)) {
+            results.reset(entrant);
+            pendingEntrants.add(entrant);
+        }
+        else if (floatingResults.isAdvanced(entrant) || floatingResults.isEliminated(entrant)) {
+            assert !entrants.contains(entrant);
+            floatingResults.reset(entrant);
+        }
+
+        Pairing<E> finishedPairing = finishedPairings.findByElement(entrant);
+        // Only true if the entrant has a result (active or floating) associated with it.
+        if (finishedPairing != null) {
+            E other = getOtherUnsafe(finishedPairing, entrant);
+            if (!hasResult(other) && !floatingResults.contains(other))
+                finishedPairings.remove(finishedPairing);
+        }
+
+        return true;
     }
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        initTransient();
+    public boolean remove(E entrant) {
+        if (isPending(entrant)) {
+            pendingEntrants.remove(entrant);
+        }
+        else if (isPaired(entrant)) {
+            Pairing<E> pairing = activePairings.findByElement(entrant);
+            resetOtherUnsafe(pairing, entrant);
+            activePairings.remove(pairing);
+        }
+        else if (isAdvanced(entrant) || isEliminated(entrant)) {
+            boolean wasMoved = results.moveTo(floatingResults, entrant);
+            // NOTE: Separate variable required so that
+            // the assert does not have side effects.
+            assert wasMoved;
+        }
+        else if (floatingResults.contains(entrant)) {
+            return false; // Already removed.
+        }
+
+        return entrants.remove(entrant);
     }
 
-    private void initTransient() {
-        random = new Random();
+    /**
+     * Checks if this round contains the entrant.
+     * The entrant must be an active participant.
+     * @param entrant The entrant.
+     * @return If the entrant participates in this round.
+     */
+    public boolean contains(E entrant) {
+        return entrants.contains(entrant);
+    }
+
+    /**
+     * Checks if the entrant participates in this round
+     * or has won or lost a pairing before and was not reset since then.
+     * @param entrant The entrant.
+     * @return If any state is associated to this entrant.
+     */
+    public boolean hasStateAbout(E entrant) {
+        return contains(entrant) || floatingResults.contains(entrant);
+    }
+
+    /**
+     * Checks if this entrant has a result of a finished pairing associated to it.
+     * @param entrant The entrant.
+     * @return If the entrant appears in a finished pairing.
+     */
+    public boolean hasResult(E entrant) {
+        return isAdvanced(entrant) || isEliminated(entrant);
+    }
+
+    public boolean isPending(E entrant) {
+        return pendingEntrants.contains(entrant);
+    }
+
+    public boolean isPaired(E entrant) {
+        return activePairings.findByElement(entrant) != null;
+    }
+
+    public boolean isAdvanced(E entrant) {
+        return results.isAdvanced(entrant);
+    }
+
+    public boolean isEliminated(E entrant) {
+        return results.isEliminated(entrant);
+    }
+
+    public boolean hasActivePairings() {
+        return !getActivePairings().isEmpty();
+    }
+
+    public boolean isFinished() {
+        // Assert either not finished or proper entrant distribution.
+        assert !(pendingEntrants.isEmpty() && activePairings.isEmpty())
+            || entrants.size() == results.getAdvanced().size() + results.getEliminated().size();
+
+        return pendingEntrants.isEmpty() && activePairings.isEmpty();
+    }
+
+    public Set<E> getPendingEntrants() {
+        return pendingEntrants.elements();
+    }
+
+    public Set<Pairing<E>> getActivePairings() {
+        return activePairings.elements();
+    }
+
+    public Set<Pairing<E>> getFinishedPairings() {
+        return finishedPairings.elements();
+    }
+
+    public Set<E> getAdvancedEntrants() {
+        return results.getAdvanced();
+    }
+
+    public Set<E> getEliminatedEntrants() {
+        return results.getEliminated();
+    }
+
+    private E getOtherUnsafe(Pairing<E> pairing, E entrant) {
+        try {
+            return pairing.getOther(entrant);
+        } catch (NoSuchElementException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void resetOtherUnsafe(Pairing<E> pairing, E entrant) {
+        E other = getOtherUnsafe(pairing, entrant);
+        pendingEntrants.add(other);
     }
 }
