@@ -147,6 +147,18 @@ public class DynamicRoundTest {
         assertTrue(singlePairFinishedRound.isPaired(loser));
     }
 
+    @Test
+    void multiEntrantRound_finishParallelPairingsOutOfOrder_identicalToInOrder() {
+        Pairing<TestEntrant> p1 = multiEntrantRound.pairRandom();
+        Pairing<TestEntrant> p2 = multiEntrantRound.pairRandom();
+        multiEntrantRound.declareWinner(p2.getEntrant1());
+        multiEntrantRound.declareWinner(p1.getEntrant2());
+        assertTrue(multiEntrantRound.isAdvanced(p1.getEntrant2()));
+        assertTrue(multiEntrantRound.isAdvanced(p2.getEntrant1()));
+        assertTrue(multiEntrantRound.isEliminated(p1.getEntrant1()));
+        assertTrue(multiEntrantRound.isEliminated(p2.getEntrant2()));
+    }
+
     // declareWinner()
 
     @Test
