@@ -74,8 +74,8 @@ public class DynamicRoundTest {
         DynamicRound<TestEntrant> round = new DynamicRound<>();
         round.add(first);
         round.add(second);
-        Assertions.assertDoesNotThrow(round::pairRandom);
-        round.declareWinner(first);
+        assertDoesNotThrow(round::pairRandom);
+        assertDoesNotThrow(() -> round.declareWinner(first));
         return round;
     }
 
@@ -118,7 +118,7 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void twoEntrantRound_pairRandom_noPendingEntrants() {
+    void twoEntrantRound_pairRandom_noPendingEntrants() throws Exception {
         twoEntrantRound.pairRandom();
         assertTrue(twoEntrantRound.getPendingEntrants().isEmpty());
     }
@@ -133,7 +133,7 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void twoEntrantRound_pairRandom_returnedPairingContainsBothEntrants() {
+    void twoEntrantRound_pairRandom_returnedPairingContainsBothEntrants() throws Exception {
         Pairing<TestEntrant> pairing = twoEntrantRound.pairRandom();
         assertTrue(pairing.contains(first));
         assertTrue(pairing.contains(second));
@@ -149,7 +149,7 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void multiEntrantRound_finishParallelPairingsOutOfOrder_identicalToInOrder() {
+    void multiEntrantRound_finishParallelPairingsOutOfOrder_identicalToInOrder() throws Exception {
         Pairing<TestEntrant> p1 = multiEntrantRound.pairRandom();
         Pairing<TestEntrant> p2 = multiEntrantRound.pairRandom();
         multiEntrantRound.declareWinner(p2.getEntrant1());
@@ -173,7 +173,7 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void singlePairRound_declareFirstWinner_winnerAdvancedAndLoserEliminated() {
+    void singlePairRound_declareFirstWinner_winnerAdvancedAndLoserEliminated() throws Exception {
         singlePairRound.declareWinner(winner);
         assertFalse(singlePairRound.isPaired(winner));
         assertFalse(singlePairRound.isPaired(loser));
@@ -182,14 +182,14 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void singlePairRound_declareWinner_returnsFinishedPairing() {
+    void singlePairRound_declareWinner_returnsFinishedPairing() throws Exception {
         Pairing<TestEntrant> expectedPairing = twoEntrantRound.pairRandom();
         Pairing<TestEntrant> finishedPairing = twoEntrantRound.declareWinner(winner);
         assertSame(expectedPairing, finishedPairing);
     }
 
     @Test
-    void singlePairRound_declareWinner_pairingFinished() {
+    void singlePairRound_declareWinner_pairingFinished() throws Exception {
         Pairing<TestEntrant> pairing = singlePairRound.declareWinner(winner);
         assertTrue(singlePairRound.getFinishedPairings().contains(pairing));
     }
@@ -347,10 +347,12 @@ public class DynamicRoundTest {
 
     @Test
     void multiEntrantRound_pairRandom_isRandom() {
-        assertSuppliesAll(entrants, () -> {
-            DynamicRound<TestEntrant> round = createMultiEntrantRound();
-            Pairing<TestEntrant> pairing = round.pairRandom();
-            return pairing.getEntrant1();
-        });
+        assertSuppliesAll(entrants, () ->
+            assertDoesNotThrow(() -> {
+                DynamicRound<TestEntrant> round = createMultiEntrantRound();
+                Pairing<TestEntrant> pairing = round.pairRandom();
+                return pairing.getEntrant1();
+            })
+        );
     }
 }
