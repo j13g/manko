@@ -295,6 +295,12 @@ This is equivalent to the following sequence of commands:
 /pair <Player1> <Player2>
 ```
 
+> **WARNING**  
+> This is only the case with dynamic rounds.
+> In a final round with three players,
+> resetting a player might result in loosing all state
+> as they might have played more than one round.
+
 The precondition is that both players
 are part of the same finished pairing.
 
