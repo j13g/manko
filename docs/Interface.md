@@ -242,9 +242,10 @@ two players are picked at random from the pending entrants.
 
 10 E  There are no participants left for another pairing.
 11 E  Not enough players. There is just one player left (<Participant>).
+12 E  The tournament is finished.
 
-12 I  <Player1> and <Player2> are already paired.  
-13 O  <Player1> and <Player2> were successfully paired.
+13 I  <Player1> and <Player2> are already paired.  
+14 O  <Player1> and <Player2> were successfully paired.
 ```
 
 Messages `1` through `9` are error messages
@@ -252,6 +253,9 @@ for the case when two players are explicitly designated,
 i.e. arguments `<Player1>` and `<Player2>` are set.
 Messages `10` and `11` can occur
 when there are not enough pending entrants left to pick from.
+
+Message `12` is for the case when it's the final round,
+and the tournament is over.
 
 The placeholders `<state1>` and `<state2>` can be one of
 `pending`, `advanced` or `eliminated`.
