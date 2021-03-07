@@ -234,16 +234,17 @@ two players are picked at random from the pending entrants.
 3 E  <Player> is already paired with another participant (<Participant>).
 4 E  <Player> has already advanced to the next round (vs. <Participant>).
 5 E  <Player> was already eliminated in a previous pairing (by <Participant>).
- 
+
 6 E  Both players are already paired with other participants.
 7 E  Both players have already advanced to the next round.
 8 E  Both players were already eliminated in a previous pairing.
 9 E  <Player1> is already <state1>. <Player2> is already <state2>.
 
 10 E  There are no participants left for another pairing.
-11 E  Not enough players. There is just one player left (<Player>).
+11 E  Not enough players. There is just one player left (<Participant>).
 
-10 O  <Player1> and <Player2> were successfully paired.
+12 I  <Player1> and <Player2> are already paired.  
+13 O  <Player1> and <Player2> were successfully paired.
 ```
 
 Messages `1` through `9` are error messages
