@@ -193,7 +193,10 @@ and that it can be reset.
 
 Message `4` is displayed
 when the player was eliminated in a previous round.
-This might be interesting to know for the tournament organizer.
+This might be interesting to know for the tournament organizer,
+as usually you do not want to add a player again
+that was eliminated previously
+(unless he might get a second chance).
 
 ### Remove an entrant
 
