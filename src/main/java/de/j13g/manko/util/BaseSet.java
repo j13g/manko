@@ -24,6 +24,11 @@ public abstract class BaseSet<E> implements Serializable {
         elements.clear();
     }
 
+    /**
+     * Returns a view of the elements.
+     * @see Collections#unmodifiableSet(Set)
+     * @return The elements.
+     */
     public Set<E> elements() {
         return Collections.unmodifiableSet(elements);
     }
