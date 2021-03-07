@@ -1,9 +1,7 @@
 package de.j13g.manko.util;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A set that contains uniform pairs, i.e. pairs with values of equal type (UniformPair).
@@ -13,9 +11,7 @@ import java.util.Set;
  * @param <P> The type of the pair.
  */
 public class UniformPairUniqueBiSet<E, P extends UniformPair<E>>
-        extends BaseSet<P> implements Serializable {
-
-    private final HashMap<E, P> index = new HashMap<>();
+        extends BaseUniformPairBiSet<E, P, P> implements Serializable {
 
     public UniformPairUniqueBiSet() {
         super(new HashSet<>());
@@ -49,6 +45,7 @@ public class UniformPairUniqueBiSet<E, P extends UniformPair<E>>
         return true;
     }
 
+    @Override
     public P removeByElement(E element) {
         P pair = findByElement(element);
         if (pair != null)
@@ -62,13 +59,13 @@ public class UniformPairUniqueBiSet<E, P extends UniformPair<E>>
         index.clear();
     }
 
-    /**
-     * Finds the pairing that contains this element
-     * or null if there is no pair with this element.
-     * @param element The element.
-     * @return The pairing with this element or null.
-     */
+    @Override
     public P findByElement(E element) {
         return index.get(element);
+    }
+
+    @Override
+    public Set<E> getPairElementSet() {
+        return index.keySet();
     }
 }

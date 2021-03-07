@@ -5,14 +5,13 @@ import de.j13g.manko.core.exceptions.NoEntrantsException;
 import de.j13g.manko.core.exceptions.NoOpponentException;
 import de.j13g.manko.core.exceptions.NoSuchEntrantException;
 import de.j13g.manko.util.ShuffledSet;
+import de.j13g.manko.util.UniformPairLinkedBiSet;
 import de.j13g.manko.util.UniformPairUniqueBiSet;
-import de.j13g.manko.util.UniformPairUniqueLinkedBiSet;
 import de.j13g.manko.util.exceptions.EmptySetException;
 import de.j13g.manko.util.exceptions.NoSuchElementException;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class DynamicRound<E extends Serializable> implements Serializable {
 
@@ -23,7 +22,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
     private final Results<E> floatingResults = new Results<>();
 
     private final UniformPairUniqueBiSet<E, Pairing<E>> activePairings = new UniformPairUniqueBiSet<>();
-    private final UniformPairUniqueLinkedBiSet<E, Pairing<E>> finishedPairings = new UniformPairUniqueLinkedBiSet<>();
+    private final UniformPairLinkedBiSet<E, Pairing<E>> finishedPairings = new UniformPairLinkedBiSet<>();
 
     public DynamicRound() {}
 
@@ -126,7 +125,8 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         activePairings.remove(pairing);
 
         // Check that entrants don't end up where they shouldn't.
-        assert entrants.size() == 2 * activePairings.size() + 2 * finishedPairings.size() + pendingEntrants.size();
+        assert entrants.size() == 2 * activePairings.size() +
+            finishedPairings.getPairElementSet().size() + pendingEntrants.size();
         assert entrants.size() == 2 * activePairings.size() +
             results.getAdvanced().size() + results.getEliminated().size() + pendingEntrants.size();
 
@@ -156,12 +156,19 @@ public class DynamicRound<E extends Serializable> implements Serializable {
             floatingResults.reset(entrant);
         }
 
-        Pairing<E> finishedPairing = finishedPairings.findByElement(entrant);
-        // Only true if the entrant has a result (active or floating) associated with it.
-        if (finishedPairing != null) {
-            E other = getOtherUnsafe(finishedPairing, entrant);
+        Set<Pairing<E>> entrantPairingSet = finishedPairings.findByElement(entrant);
+
+        // Create a copy because removing elements from finishedPairings
+        // in the loop below will modify the original set.
+        List<Pairing<E>> entrantPairings = new ArrayList<>(entrantPairingSet);
+
+        // Remove all pairings that this entrant is part of
+        // and where the other entrant does not have any results
+        // i.e. the other entrant was reset before too.
+        for (Pairing<E> pairing : entrantPairings) {
+            E other = getOtherUnsafe(pairing, entrant);
             if (!hasResult(other) && !floatingResults.contains(other))
-                finishedPairings.remove(finishedPairing);
+                finishedPairings.remove(pairing);
         }
 
         return true;

@@ -19,13 +19,14 @@ public class DynamicRoundTest {
 
     private final TestEntrant first = createEntrant();
     private final TestEntrant second = createEntrant();
+    private final TestEntrant third = createEntrant();
     private final TestEntrant invalidEntrant = createEntrant();
 
-    private final Set<TestEntrant> entrants = new HashSet<>(Arrays.asList(
-        first, second,
-        createEntrant(), createEntrant(), createEntrant(), createEntrant(),
-        createEntrant(), createEntrant(), createEntrant(), createEntrant()
-    ));
+    private final List<TestEntrant> entrants = Arrays.asList(
+        first, second, third, createEntrant(),
+        createEntrant(), createEntrant(), createEntrant(),
+        createEntrant(), createEntrant(), createEntrant()
+    );
 
     private final TestEntrant winner = first;
     private final TestEntrant loser = second;
@@ -266,6 +267,34 @@ public class DynamicRoundTest {
         singlePairFinishedRound.remove(winner);
         singlePairFinishedRound.reset(loser);
         assertEquals(1, singlePairFinishedRound.getFinishedPairings().size());
+    }
+
+    @Test
+    void threeEntrantRound_resetLoserThenPairAgainstOther_hasTwoFinishedPairings() throws Exception {
+        twoEntrantRound.add(third);
+        DynamicRound<TestEntrant> threeEntrantRound = twoEntrantRound;
+
+        Pairing<TestEntrant> firstPairing = threeEntrantRound.pairRandom();
+        TestEntrant firstWinner = firstPairing.getEntrant1();
+        TestEntrant firstLoser = firstPairing.getEntrant2();
+
+        threeEntrantRound.declareWinner(firstWinner);
+        threeEntrantRound.reset(firstLoser);
+
+        Pairing<TestEntrant> secondPairing = threeEntrantRound.pairRandom();
+        TestEntrant secondLoser = secondPairing.getOther(firstLoser);
+
+        threeEntrantRound.declareWinner(firstLoser);
+
+        assertTrue(threeEntrantRound.isAdvanced(firstLoser));
+        assertTrue(threeEntrantRound.isAdvanced(firstWinner));
+        assertTrue(threeEntrantRound.isEliminated(secondLoser));
+        assertEquals(2, threeEntrantRound.getFinishedPairings().size());
+
+        // After resetting this player which participated in both pairings,
+        // those pairings should still exist.
+        threeEntrantRound.reset(firstLoser);
+        assertEquals(2, threeEntrantRound.getFinishedPairings().size());
     }
 
     // remove()
