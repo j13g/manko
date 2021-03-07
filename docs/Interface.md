@@ -92,6 +92,11 @@ Wich option is picked depends on the current state.
 This is done to save space and reduce redundancy
 by duplicating the message for each option.
 
+Options can be also nested.
+This is done by appending another letter
+to the letter(s) of the current nesting level
+(e.g. `aa`, `ab`, etc.).
+
 In case there needs to be text after those options
 one must designate the starting point with a dash (`-`).
 The message starting at the line with this dash
@@ -370,6 +375,284 @@ b    but they would be eliminated
 2 O  <Player> was reset.
 a    They were fully removed from the tournament.
 b    They are now in pending state.
+```
+
+### Get Information
+
+```
+/i /info [round|pending|pairings|running|advanced|eliminated|results]
+```
+
+Prints information about the given subject.
+
+If no subject is given, `round` is picked as the default value.
+In case the tournament is finished `standings` is picked instead
+such that tournament results are listed instead of round information.
+
+#### Errors
+
+No matter the subject,
+these messages apply to all invocations of the command:
+
+```
+0 E  No tournament is running.
+```
+
+#### Round
+
+Subject: `round`
+
+Lists all information about the current round.
+
+##### Elimination round
+
+```
+1 O  Currently in the {1st|2nd|3rd|...} elimination round.
+     Pending: - | {<Player1>[, <Player2>[, ...]]}
+     Advanced: - | {<Player1>[, <Player2>[, ...]]}
+     Eliminated: - | {<Player1>[, <Player2>[, ...]]}
+a    Currently active pairings: -
+b    Currently active pairings:
+     <Player1> vs. <Player2>
+    [<Player3> vs. <Player4>
+     [...]]
+```
+
+##### Final Round - Round Robin
+
+```
+2 O  This is the final round of the tournament.
+a    Round robin: <Player1>, <Player2>, <Player3>
+     No pairings have been started yet.
+
+b    Round robin: <Player1>, <Player2>, <Player3>
+     <Player1> vs. <Player2> - {Pending | Running... | <Player1> won}
+     Outstanding pairings (order may vary):
+     <Player1> vs. <Player3>
+     <Player2> vs. <Player3>
+
+c    Round robin:
+     <Player1> vs. <Player2> - <Player1> won
+     <Player1> vs. <Player3> - {Pending | Running ...}
+     <Player2> vs. <Player3> - Pending
+
+d    Round robin:
+     <Player1> vs. <Player2> - <Player1> won
+     <Player1> vs. <Player3> - <Player1> won
+     <Player2> vs. <Player3> - {Pending | Running ...}
+
+e    Round robin:
+     <Player1> vs. <Player2> - <Player1> won
+     <Player1> vs. <Player3> - <Player1> won
+     <Player2> vs. <Player3> - <Player2> won
+```
+
+The order of the upcoming pairings is not determined beforehand.
+Thus, in option `b`, only one pairing is listed.
+In option `c`, after the second pairing has been started,
+the order of the remaining pairings is known.
+
+##### Final Round - Half Final and Final
+
+```
+3 O  This is the final round of the tournament.
+a    Half final: <Player1>, <Player2>, <Player3>, <Player4>
+     No pairings have been started yet.
+
+b    Half final:
+     <Player1> vs. <Player3> - {Pending | Running...}
+     <Player2> vs. <Player4> - Pending
+
+c    Half final:
+     <Player1> vs. <Player3> - <Player1> won
+     <Player2> vs. <Player4> - {Pending | Running...}
+     Game for 3rd place:
+     <Player3> vs. ? - To be determined
+     Game for 2nd and 1st place:
+     <Player1> vs. ? - To be determined
+
+d    Half final:
+     <Player1> vs. <Player3> - <Player1> won
+     <Player2> vs. <Player4> - <Player2> won
+     Game for 3rd place:
+     <Player3> vs. <Player4> - {Pending | Running...}
+     Game for 2nd and 1st place:
+     <Player1> vs. <Player2> - {Pending | Running...}
+
+e    Half final:
+     <Player1> vs. <Player3> - <Player1> won
+     <Player2> vs. <Player4> - <Player2> won
+     Game for 3rd place:
+     <Player3> vs. <Player4> - <Player3> won
+     Game for 2nd and 1st place:
+     <Player1> vs. <Player2> - <Player1> won
+```
+
+---
+
+#### Pending Entrants
+
+Subject: `pending`
+
+Lists pending entrants.
+
+##### Elimination Round
+
+```
+1 O  Pending: - | {<Player1>[, <Player2>[, ...]]}  
+```
+
+##### Final Round - Round Robin
+
+```
+2 O  Number of rounds each players needs to play:
+     <Player1>: {- | 1 | 2}
+     <Player2>: {- | 1 | 2}
+     <Player3>: {- | 1 | 2}
+```
+
+##### Final Round - Half Final and Final
+
+```
+3 O  Pending: - | {<Player1>[, <Player2>[, ...]]}  
+```
+
+---
+
+#### All Pairings
+
+Subject: `pairings`
+
+Lists all known pairings (running, upcoming and outstanding).
+
+```
+1 O
+aa   Finished pairings: -
+ab   Finished pairings:
+     <Player1> vs. <Player2> - <Player1> won
+     [...]
+
+ba   Running pairings: -
+bb   Running pairings:
+     <Player1> vs. <Player2>
+     [...]
+
+ca   Upcoming pairings: -
+cb   Upcoming pairings:
+     <Player1> vs. <Player2>
+cc   Upcoming pairings (in order):
+     <Player1> vs. <Player2>
+     <Player3> vs. <Player4>
+
+da   Outstanding pairings: -
+db   Outstanding pairings (order may vary):
+     <Player3> vs. <Player4>
+     <Player5> vs. <Player6>
+     [...]
+```
+
+Note that `Outstanding pairings` will never list exactly one pairing.
+This is because that pairing can be treated as an `Upcoming pairing`.
+
+#### Running Pairings
+
+Subject: `running`
+
+Lists currently running pairings.
+
+```
+1 O
+a    Running pairings: -
+b    Running pairings:
+     <Player1> vs. <Player2>
+     [...]
+```
+
+#### Advanced participants
+
+Subject: `advanced`
+
+Lists the participants that have advanced to the next round.
+
+This is only possible in an elimination round.
+
+```
+1 E  Not in an elimination round.
+
+2 O  Advanced: - | {<Player1>[, <Player2>[, ...]]}
+```
+
+#### Eliminated participants
+
+Subject: `eliminated`
+
+Lists the participants that have been eliminated
+
+This is only possible in an elimination round.
+
+```
+1 E  Not in an elimination round.
+
+2 O  Eliminated: - | {<Player1>[, <Player2>[, ...]]}
+```
+
+#### Round Results
+
+Subject: `results`
+
+Lists the results of the current round,
+or the tournament if this round is the final round.
+
+##### Elimination Round
+
+```
+1 O  Advanced: - | {<Player1>[, <Player2>[, ...]]}
+     Eliminated: - | {<Player1>[, <Player2>[, ...]]}
+```
+
+##### Final Round - Round Robin
+
+```
+2 O
+a    1st place: ? - To be determined
+     2nd place: ? - To be determined
+     3rd place: ? - To be determined
+
+b    1st or 2nd place: {<Player1> | <Player2>} 
+     2nd or 3rd place: {<Player2> | <Player3>}
+
+c    ...
+```
+
+Option `b` is printed after one pairing has been finished.
+Imagine `Player1` wins against `Player3`.
+`Player1` will then reach 1st or 2nd place,
+but cannot reach 3rd place
+(for which you'd need to lose every pairing).
+`Player3` on the other hand will only play one more pairing
+for which he can get at most one win.
+Thus, they cannot reach 1st place anymore. 
+`Player2` can still reach all places.
+
+Option `c` is a placeholder for all the other options,
+as the number of permutations is quite large
+while it's not really necessary to define all possibilities.
+
+##### Final Round - Half Final and Final
+
+```
+3 O
+a    1st place: ? - To be determined
+     2nd place: ? - To be determined
+     3rd place: ? - To be determined
+
+b    1st place: ? - To be determined
+     2nd place: ? - To be determined
+     3rd place: <Player3>
+
+b    1st place: <Player1>
+     2nd place: <Player2>
+     3rd place: <Player3>
 ```
 
 [comment]: <> (## Events)
