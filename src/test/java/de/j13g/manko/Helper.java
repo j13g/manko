@@ -3,6 +3,7 @@ package de.j13g.manko;
 import java.io.*;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,10 +20,14 @@ public class Helper {
      */
     public static <T> void assertSuppliesAll(Collection<T> expectedElements, Supplier<T> supplier, int iterations) {
         HashSet<T> encountered = new HashSet<>();
+        Set<T> expected = new HashSet<>(expectedElements);
+
+        if (expected.size() != expectedElements.size())
+            throw new IllegalArgumentException("Duplicate elements in expected elements");
 
         for (int i = 0; i <= iterations; ++i) {
             encountered.add(supplier.get());
-            if (encountered.equals(expectedElements))
+            if (encountered.equals(expected))
                 return; // Encountered all expected elements.
             if (encountered.size() > expectedElements.size())
                 break; // Got more than the expected elements.

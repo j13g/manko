@@ -370,8 +370,9 @@ public class DynamicRoundTest {
 
     @Test
     void testEntrants_uniqueIds() {
-        List<Integer> ids = Arrays.asList(first.id(), second.id(), invalidEntrant.id());
-        assertEquals(ids.size(), new HashSet<>(ids).size());
+        ArrayList<TestEntrant> allEntrants = new ArrayList<>(entrants);
+        allEntrants.add(invalidEntrant);
+        assertEquals(allEntrants.size(), new HashSet<>(allEntrants).size());
     }
 
     @Test
