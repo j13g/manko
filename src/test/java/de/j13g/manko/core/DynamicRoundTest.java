@@ -3,6 +3,7 @@ package de.j13g.manko.core;
 import de.j13g.manko.core.exceptions.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -198,8 +199,9 @@ public class DynamicRoundTest {
     }
 
     @Test
+    @Disabled
     void multiPairRound_declareAllWinners_finishedPairingsAreOrderedChronologically() {
-        assert true; // TODO
+        assert false; // TODO
     }
 
     // replayPairing()
