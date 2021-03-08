@@ -49,58 +49,29 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return true;
     }
 
-    // TODO
-//    public Pairing<E> pair(E entrant1, E entrant2) {
-//        if (!contains(entrant1) || !contains(entrant2))
-//            throw new NoSuchEntrantException();
-//
-//        if (!isPending(entrant1) || !isPending(entrant2))
-//            throw new EntrantNotPendingException();
-//    }
+    public Pairing<E> createPairing(E entrant1, E entrant2) throws NoSuchEntrantException, EntrantNotPendingException {
+        if (!contains(entrant1) || !contains(entrant2))
+            throw new NoSuchEntrantException();
+        if (!isPending(entrant1) || !isPending(entrant2))
+            throw new EntrantNotPendingException();
 
-    /**
-     * Creates a pairing between two randomly chosen entrants.
-     * @return The created pairing.
-     * @throws NoEntrantsException The round does not have any entrants.
-     * @throws NoOpponentException The only entrant does not have an opponent.
-     */
+        pendingEntrants.remove(entrant1);
+        pendingEntrants.remove(entrant2);
+        return registerPairing(entrant1, entrant2);
+    }
+
     public Pairing<E> nextPairing() throws NoEntrantsException, NoOpponentException {
         if (pendingEntrants.size() == 0) throw new NoEntrantsException();
         if (pendingEntrants.size() == 1) throw new NoOpponentException();
 
-        Pairing<E> pairing;
         try {
             E entrant1 = pendingEntrants.removeRandom();
             E entrant2 = pendingEntrants.removeRandom();
-            pairing = new Pairing<>(entrant1, entrant2);
+            return registerPairing(entrant1, entrant2);
         }
         catch (EmptySetException e) {
             throw new RuntimeException(e);
         }
-
-        // A created pairing may not have been played before.
-        assert !finishedPairings.contains(pairing);
-
-        activePairings.add(pairing);
-        return pairing;
-    }
-
-    /**
-     * Cancels a pairing, effectively resetting both entrants.
-     * @param pairing The pairing.
-     * @return If the pairing existed.
-     */
-    public boolean cancelPairing(Pairing<E> pairing) {
-        return reset(pairing.getEntrant1());
-    }
-
-    /**
-     * Cancels the pairing that the entrant is part of.
-     * @param entrant The entrant.
-     * @return If that pairing existed.
-     */
-    public boolean cancelPairingByEntrant(E entrant) {
-        return reset(entrant);
     }
 
     /**
@@ -305,6 +276,24 @@ public class DynamicRound<E extends Serializable> implements Serializable {
 
     public Set<E> getEliminatedEntrants() {
         return results.getEliminated();
+    }
+
+    /**
+     * Creates a new pairing with two participants.
+     * Does not check if the participants are part of the round or are pending.
+     * @param entrant1 The first entrant.
+     * @param entrant2 The second entrant.
+     * @return The created pairing containing both entrants.
+     */
+    private Pairing<E> registerPairing(E entrant1, E entrant2) {
+
+        Pairing<E> pairing = new Pairing<>(entrant1, entrant2);
+
+        assert !activePairings.contains(pairing);
+        assert !finishedPairings.contains(pairing);
+
+        activePairings.add(pairing);
+        return pairing;
     }
 
     private E getOtherUnsafe(Pairing<E> pairing, E entrant) {

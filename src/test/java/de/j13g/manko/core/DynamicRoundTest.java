@@ -109,6 +109,21 @@ public class DynamicRoundTest {
         assertFalse(singlePairFinishedRound.isPending(winner));
     }
 
+    // createPairing()
+
+    @Test
+    void notEnoughEntrants_pair_throwsNoSuchEntrantException() {
+        assertThrows(NoSuchEntrantException.class, () -> emptyRound.createPairing(first, second));
+        assertThrows(NoSuchEntrantException.class, () -> oneEntrantRound.createPairing(first, second));
+    }
+
+    @Test
+    void multiEntrantRound_pairWithPaired_throwsEntrantNotPendingException() {
+        Pairing<TestEntrant> pairing = assertDoesNotThrow(() -> multiEntrantRound.createPairing(first, second));
+        assertThrows(EntrantNotPendingException.class, () ->
+            multiEntrantRound.createPairing(pairing.getEntrant1(), third));
+    }
+
     // nextPairing()
 
     @Test
