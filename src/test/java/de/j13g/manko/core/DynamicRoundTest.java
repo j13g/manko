@@ -1,9 +1,6 @@
 package de.j13g.manko.core;
 
-import de.j13g.manko.core.exceptions.MissingPairingException;
-import de.j13g.manko.core.exceptions.NoEntrantsException;
-import de.j13g.manko.core.exceptions.NoOpponentException;
-import de.j13g.manko.core.exceptions.NoSuchEntrantException;
+import de.j13g.manko.core.exceptions.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +52,7 @@ public class DynamicRoundTest {
         singlePairRound = new DynamicRound<>();
         singlePairRound.add(first);
         singlePairRound.add(second);
-        assertDoesNotThrow(() -> singlePairRound.pairRandom());
+        assertDoesNotThrow(() -> singlePairRound.nextPairing());
 
         singlePairFinishedRound = createSinglePairFinishedRound();
     }
@@ -75,7 +72,7 @@ public class DynamicRoundTest {
         DynamicRound<TestEntrant> round = new DynamicRound<>();
         round.add(first);
         round.add(second);
-        assertDoesNotThrow(round::pairRandom);
+        assertDoesNotThrow(round::nextPairing);
         assertDoesNotThrow(() -> round.declareWinner(first));
         return round;
     }
@@ -106,27 +103,27 @@ public class DynamicRoundTest {
         assertFalse(singlePairFinishedRound.isPending(winner));
     }
 
-    // pairRandom()
+    // nextPairing()
 
     @Test
-    void emptyRound_pairRandom_throwsNoEntrantsException() {
-        assertThrows(NoEntrantsException.class, () -> emptyRound.pairRandom());
+    void emptyRound_nextPairing_throwsNoEntrantsException() {
+        assertThrows(NoEntrantsException.class, () -> emptyRound.nextPairing());
     }
 
     @Test
-    void oneEntrantRound_pairRandom_throwsNoOpponentException() {
-        assertThrows(NoOpponentException.class, () -> oneEntrantRound.pairRandom());
+    void oneEntrantRound_nextPairing_throwsNoOpponentException() {
+        assertThrows(NoOpponentException.class, () -> oneEntrantRound.nextPairing());
     }
 
     @Test
-    void twoEntrantRound_pairRandom_noPendingEntrants() throws Exception {
-        twoEntrantRound.pairRandom();
+    void twoEntrantRound_nextPairing_noPendingEntrants() throws Exception {
+        twoEntrantRound.nextPairing();
         assertTrue(twoEntrantRound.getPendingEntrants().isEmpty());
     }
 
     @Test
-    void twoEntrantRound_pairRandom_bothEntrantsArePaired() {
-        Assertions.assertDoesNotThrow(twoEntrantRound::pairRandom);
+    void twoEntrantRound_nextPairing_bothEntrantsArePaired() {
+        Assertions.assertDoesNotThrow(twoEntrantRound::nextPairing);
         assertFalse(twoEntrantRound.isPending(first));
         assertFalse(twoEntrantRound.isPending(second));
         assertTrue(twoEntrantRound.isPaired(first));
@@ -134,8 +131,8 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void twoEntrantRound_pairRandom_returnedPairingContainsBothEntrants() throws Exception {
-        Pairing<TestEntrant> pairing = twoEntrantRound.pairRandom();
+    void twoEntrantRound_nextPairing_returnedPairingContainsBothEntrants() throws Exception {
+        Pairing<TestEntrant> pairing = twoEntrantRound.nextPairing();
         assertTrue(pairing.contains(first));
         assertTrue(pairing.contains(second));
     }
@@ -144,15 +141,15 @@ public class DynamicRoundTest {
     void singlePairFinishedRound_resetPairedEntrantsAndPairRandomAgain_entrantsArePaired() {
         singlePairFinishedRound.reset(winner);
         singlePairFinishedRound.reset(loser);
-        Assertions.assertDoesNotThrow(singlePairFinishedRound::pairRandom);
+        Assertions.assertDoesNotThrow(singlePairFinishedRound::nextPairing);
         assertTrue(singlePairFinishedRound.isPaired(winner));
         assertTrue(singlePairFinishedRound.isPaired(loser));
     }
 
     @Test
     void multiEntrantRound_finishParallelPairingsOutOfOrder_identicalToInOrder() throws Exception {
-        Pairing<TestEntrant> p1 = multiEntrantRound.pairRandom();
-        Pairing<TestEntrant> p2 = multiEntrantRound.pairRandom();
+        Pairing<TestEntrant> p1 = multiEntrantRound.nextPairing();
+        Pairing<TestEntrant> p2 = multiEntrantRound.nextPairing();
         multiEntrantRound.declareWinner(p2.getEntrant1());
         multiEntrantRound.declareWinner(p1.getEntrant2());
         assertTrue(multiEntrantRound.isAdvanced(p1.getEntrant2()));
@@ -184,7 +181,7 @@ public class DynamicRoundTest {
 
     @Test
     void singlePairRound_declareWinner_returnsFinishedPairing() throws Exception {
-        Pairing<TestEntrant> expectedPairing = twoEntrantRound.pairRandom();
+        Pairing<TestEntrant> expectedPairing = twoEntrantRound.nextPairing();
         Pairing<TestEntrant> finishedPairing = twoEntrantRound.declareWinner(winner);
         assertSame(expectedPairing, finishedPairing);
     }
@@ -274,14 +271,14 @@ public class DynamicRoundTest {
         twoEntrantRound.add(third);
         DynamicRound<TestEntrant> threeEntrantRound = twoEntrantRound;
 
-        Pairing<TestEntrant> firstPairing = threeEntrantRound.pairRandom();
+        Pairing<TestEntrant> firstPairing = threeEntrantRound.nextPairing();
         TestEntrant firstWinner = firstPairing.getEntrant1();
         TestEntrant firstLoser = firstPairing.getEntrant2();
 
         threeEntrantRound.declareWinner(firstWinner);
         threeEntrantRound.reset(firstLoser);
 
-        Pairing<TestEntrant> secondPairing = threeEntrantRound.pairRandom();
+        Pairing<TestEntrant> secondPairing = threeEntrantRound.nextPairing();
         TestEntrant secondLoser = secondPairing.getOther(firstLoser);
 
         threeEntrantRound.declareWinner(firstLoser);
@@ -376,11 +373,11 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void multiEntrantRound_pairRandom_isRandom() {
+    void multiEntrantRound_nextPairing_isRandom() {
         assertSuppliesAll(entrants, () ->
             assertDoesNotThrow(() -> {
                 DynamicRound<TestEntrant> round = createMultiEntrantRound();
-                Pairing<TestEntrant> pairing = round.pairRandom();
+                Pairing<TestEntrant> pairing = round.nextPairing();
                 return pairing.getEntrant1();
             })
         );

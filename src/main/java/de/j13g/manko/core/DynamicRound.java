@@ -64,7 +64,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
      * @throws NoEntrantsException The round does not have any entrants.
      * @throws NoOpponentException The only entrant does not have an opponent.
      */
-    public Pairing<E> pairRandom() throws NoEntrantsException, NoOpponentException {
+    public Pairing<E> nextPairing() throws NoEntrantsException, NoOpponentException {
         if (pendingEntrants.size() == 0) throw new NoEntrantsException();
         if (pendingEntrants.size() == 1) throw new NoOpponentException();
 
