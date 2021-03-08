@@ -305,6 +305,12 @@ public class DynamicRoundTest {
     }
 
     @Test
+    void singlePairFinishedRound_removeWinnerAgain_returnsFalse() {
+        singlePairFinishedRound.remove(winner);
+        assertFalse(singlePairFinishedRound.remove(winner));
+    }
+
+    @Test
     void singlePairRound_removeFirst_secondIsPending() {
         singlePairRound.remove(first);
         assertTrue(singlePairRound.isPending(second));
