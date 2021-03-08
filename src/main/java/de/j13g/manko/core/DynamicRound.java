@@ -1,9 +1,7 @@
 package de.j13g.manko.core;
 
-import de.j13g.manko.core.exceptions.MissingPairingException;
-import de.j13g.manko.core.exceptions.NoEntrantsException;
-import de.j13g.manko.core.exceptions.NoOpponentException;
-import de.j13g.manko.core.exceptions.NoSuchEntrantException;
+import de.j13g.manko.core.base.EliminationRound;
+import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.util.ShuffledSet;
 import de.j13g.manko.util.UniformPairLinkedBiSet;
 import de.j13g.manko.util.UniformPairUniqueBiSet;
@@ -13,7 +11,7 @@ import de.j13g.manko.util.exceptions.NoSuchElementException;
 import java.io.Serializable;
 import java.util.*;
 
-public class DynamicRound<E extends Serializable> implements Serializable {
+public class DynamicRound<E extends Serializable> implements EliminationRound<E>, Serializable {
 
     private final HashSet<E> entrants = new HashSet<>();
     private final ShuffledSet<E> pendingEntrants = new ShuffledSet<>();
@@ -30,11 +28,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         entrants.forEach(this::add);
     }
 
-    /**
-     * Add an entrant to this round.
-     * @param entrant The entrant.
-     * @return If the entrant was not already in this round.
-     */
+    @Override
     public boolean add(E entrant) {
         if (entrants.contains(entrant))
             return false;
@@ -49,6 +43,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return true;
     }
 
+    @Override
     public Pairing<E> createPairing(E entrant1, E entrant2) throws NoSuchEntrantException, EntrantNotPendingException {
         if (!contains(entrant1) || !contains(entrant2))
             throw new NoSuchEntrantException();
@@ -60,6 +55,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return registerPairing(entrant1, entrant2);
     }
 
+    @Override
     public Pairing<E> nextPairing() throws NoEntrantsException, NoOpponentException {
         if (pendingEntrants.size() == 0) throw new NoEntrantsException();
         if (pendingEntrants.size() == 1) throw new NoOpponentException();
@@ -74,13 +70,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         }
     }
 
-    /**
-     * Declares the winner of an active pairing.
-     * @param entrant The winning entrant.
-     * @return The pairing this entrant was part of.
-     * @throws NoSuchEntrantException This entrant is not part of this round.
-     * @throws MissingPairingException This entrant is not part of any active pairing.
-     */
+    @Override
     public Pairing<E> declareWinner(E entrant) throws NoSuchEntrantException, MissingPairingException {
         if (!contains(entrant))
             throw new NoSuchEntrantException();
@@ -104,6 +94,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return pairing;
     }
 
+    @Override
     public boolean replayPairing(Pairing<E> pairing)
             throws NoSuchPairingException, MissingEntrantException, EntrantNotPendingException {
         if (activePairings.contains(pairing))
@@ -138,11 +129,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return true; // TODO
     }
 
-    /**
-     * Resets an entrant back to the pending state.
-     * @param entrant The entrant.
-     * @return If the entrant was not already in pending state.
-     */
+    @Override
     public boolean reset(E entrant) {
         if (!hasStateAbout(entrant) || isPending(entrant))
             return false;
@@ -179,6 +166,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return true;
     }
 
+    @Override
     public boolean remove(E entrant) {
         if (isPending(entrant)) {
             pendingEntrants.remove(entrant);
@@ -201,12 +189,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return entrants.remove(entrant);
     }
 
-    /**
-     * Checks if this round contains the entrant.
-     * The entrant must be an active participant.
-     * @param entrant The entrant.
-     * @return If the entrant participates in this round.
-     */
+    @Override
     public boolean contains(E entrant) {
         return entrants.contains(entrant);
     }
@@ -221,27 +204,27 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return contains(entrant) || floatingResults.contains(entrant);
     }
 
-    /**
-     * Checks if this entrant has a result of a finished pairing associated to it.
-     * @param entrant The entrant.
-     * @return If the entrant appears in a finished pairing.
-     */
+    @Override
     public boolean hasResult(E entrant) {
-        return isAdvanced(entrant) || isEliminated(entrant);
+        return results.contains(entrant);
     }
 
+    @Override
     public boolean isPending(E entrant) {
         return pendingEntrants.contains(entrant);
     }
 
+    @Override
     public boolean isPaired(E entrant) {
         return activePairings.findByElement(entrant) != null;
     }
 
+    @Override
     public boolean isAdvanced(E entrant) {
         return results.isAdvanced(entrant);
     }
 
+    @Override
     public boolean isEliminated(E entrant) {
         return results.isEliminated(entrant);
     }
@@ -250,6 +233,7 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return !getActivePairings().isEmpty();
     }
 
+    @Override
     public boolean isFinished() {
         // Assert either not finished or proper entrant distribution.
         assert !(pendingEntrants.isEmpty() && activePairings.isEmpty())
@@ -258,22 +242,27 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return pendingEntrants.isEmpty() && activePairings.isEmpty();
     }
 
+    @Override
     public Set<E> getPendingEntrants() {
         return pendingEntrants.elements();
     }
 
+    @Override
     public Set<Pairing<E>> getActivePairings() {
         return activePairings.elements();
     }
 
+    @Override
     public Set<Pairing<E>> getFinishedPairings() {
         return finishedPairings.elements();
     }
 
+    @Override
     public Set<E> getAdvancedEntrants() {
         return results.getAdvanced();
     }
 
+    @Override
     public Set<E> getEliminatedEntrants() {
         return results.getEliminated();
     }
