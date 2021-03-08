@@ -199,9 +199,24 @@ public class DynamicRoundTest {
     }
 
     @Test
-    @Disabled
-    void multiPairRound_declareAllWinners_finishedPairingsAreOrderedChronologically() {
-        assert false; // TODO
+    void multiPairRound_declareAllWinners_finishedPairingsAreOrderedChronologically() throws Exception {
+        List<TestEntrant> winners = Arrays.asList(first, second, third);
+        for (int i = 0; i < winners.size(); ++i) {
+            TestEntrant loser = entrants.get(winners.size() + i);
+            multiEntrantRound.createPairing(winners.get(i), loser);
+        }
+
+        Collections.shuffle(winners);
+        for (TestEntrant winner : winners)
+            multiEntrantRound.declareWinner(winner);
+
+        List<Pairing<TestEntrant>> finishedPairings = new ArrayList<>(multiEntrantRound.getFinishedPairings());
+        assertEquals(winners.size(), finishedPairings.size());
+        for (int i = 0; i < winners.size(); ++i) {
+            TestEntrant winner = winners.get(i);
+            Pairing<TestEntrant> pairing = finishedPairings.get(i);
+            assertTrue(pairing.getFirst() == winner || pairing.getSecond() == winner);
+        }
     }
 
     // replayPairing()
