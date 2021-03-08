@@ -77,6 +77,11 @@ public class DynamicRoundTest {
         return round;
     }
 
+    private Pairing<TestEntrant> getFinishedPairing(DynamicRound<TestEntrant> round) {
+        assertEquals(1, round.getFinishedPairings().size());
+        return round.getFinishedPairings().iterator().next();
+    }
+
     // add()
 
     @Test
@@ -195,6 +200,67 @@ public class DynamicRoundTest {
     @Test
     void multiPairRound_declareAllWinners_finishedPairingsAreOrderedChronologically() {
         assert true; // TODO
+    }
+
+    // replayPairing()
+
+    @Test
+    void singlePairRound_replayActivePairing_returnsFalse() throws Exception {
+        Pairing<TestEntrant> pairing = twoEntrantRound.nextPairing();
+        assertFalse(assertDoesNotThrow(() -> twoEntrantRound.replayPairing(pairing)));
+    }
+
+    @Test
+    void twoEntrantRound_replayInvalidPairing_throwsNoSuchPairingException() {
+        assertThrows(NoSuchPairingException.class, () ->
+            twoEntrantRound.replayPairing(new Pairing<>(first, second)));
+    }
+
+    @Test
+    void singlePairFinishedRound_replayPairing_bothEntrantsArePaired() {
+        Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
+        assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
+        assertTrue(singlePairFinishedRound.getActivePairings().contains(pairing));
+        assertFalse(singlePairFinishedRound.hasResult(first));
+        assertFalse(singlePairFinishedRound.hasResult(second));
+    }
+
+    @Test
+    void singlePairFinishedRound_resetFirstEntrantAndReplayPairing_bothEntrantsArePaired() {
+        Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
+        singlePairFinishedRound.reset(first);
+        assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
+        assertTrue(singlePairFinishedRound.getActivePairings().contains(pairing));
+        assertFalse(singlePairFinishedRound.hasResult(first));
+        assertFalse(singlePairFinishedRound.hasResult(second));
+    }
+
+    @Test
+    void singlePairFinishedRound_resetFirstAndPairWithThirdThenReplayFirstPairing_throwsEntrantNotPendingException() {
+        Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
+        singlePairFinishedRound.add(third);
+        singlePairFinishedRound.reset(first);
+        assertDoesNotThrow(() -> singlePairFinishedRound.createPairing(first, third));
+        assertThrows(EntrantNotPendingException.class, () -> singlePairFinishedRound.replayPairing(pairing));
+
+        // Resetting that entrant and then replaying should work.
+        singlePairFinishedRound.reset(first);
+        assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
+    }
+
+    @Test
+    void singlePairFinishedRound_removeBothEntrantsAndReplayPairing_throwsMissingEntrantException() {
+        Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
+        singlePairFinishedRound.remove(first);
+        singlePairFinishedRound.remove(second);
+        assertThrows(MissingEntrantException.class, () -> singlePairFinishedRound.replayPairing(pairing));
+    }
+
+    @Test
+    void singlePairFinishedRound_removeFirstEntrantAndReplayPairing_throwsMissingEntrantException() {
+        Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
+        singlePairFinishedRound.remove(first);
+        assertThrows(MissingEntrantException.class, () -> singlePairFinishedRound.replayPairing(pairing));
     }
 
     // reset()

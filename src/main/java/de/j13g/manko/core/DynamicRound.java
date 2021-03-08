@@ -133,6 +133,40 @@ public class DynamicRound<E extends Serializable> implements Serializable {
         return pairing;
     }
 
+    public boolean replayPairing(Pairing<E> pairing)
+            throws NoSuchPairingException, MissingEntrantException, EntrantNotPendingException {
+        if (activePairings.contains(pairing))
+            return false;
+        if (!finishedPairings.contains(pairing))
+            throw new NoSuchPairingException();
+
+        E first = pairing.getFirst();
+        E second = pairing.getSecond();
+
+        // One of the entrants could be removed,
+        // since finished pairings are only removed if both entrants are gone.
+        if (!contains(first) || !contains(second))
+            throw new MissingEntrantException();
+
+        boolean firstHasResult = hasResult(first);
+        boolean secondHasResult = hasResult(second);
+        assert firstHasResult || secondHasResult;
+
+        if (!firstHasResult || !secondHasResult) {
+            E withoutResult = firstHasResult ? second : first;
+            if (!isPending(withoutResult))
+                throw new EntrantNotPendingException();
+        }
+
+        results.reset(first);
+        results.reset(second);
+        finishedPairings.remove(pairing);
+
+        registerPairing(first, second);
+
+        return true; // TODO
+    }
+
     /**
      * Resets an entrant back to the pending state.
      * @param entrant The entrant.

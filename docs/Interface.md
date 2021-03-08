@@ -296,20 +296,6 @@ c    They were already eliminated (by <Participant>).
 
 Replays a pairing of two players in the current round.
 
-This is equivalent to the following sequence of commands:
-
-```
-/reset <Player1>  (y)
-/reset <Player2>  (y)
-/pair <Player1> <Player2>
-```
-
-> **WARNING**  
-> This is only the case with dynamic rounds.
-> In a final round with three players,
-> resetting a player might result in loosing all state
-> as they might have played more than one round.
-
 The precondition is that both players
 are part of the same finished pairing.
 
@@ -319,9 +305,16 @@ are part of the same finished pairing.
 
 3 I  The pairing between <Player1> and <Player2> is still running.
 4 E  <Player1> and <Player2> did not appear in a previous pairing. 
+5 E  <Player> was reset but is not pending. Reset them again to replay.
 
-5 O  <Player1> and <Player2> were reset and are now paired again.  
+6 O  <Player1> and <Player2> were reset and are now paired again.  
 ```
+
+Message `5` is shown when a player was reset before,
+but is currently not in pending state.
+This might be the case when that player
+was paired with another player after being reset.
+To replay that player must be in pending state.
 
 ### Reset an entrant
 
