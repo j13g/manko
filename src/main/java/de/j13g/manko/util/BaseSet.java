@@ -48,10 +48,10 @@ public abstract class BaseSet<E> implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ShuffledSet<?>))
+        if (!(o instanceof BaseSet<?>))
             return false;
 
-        ShuffledSet<?> other = (ShuffledSet<?>)o;
+        BaseSet<?> other = (BaseSet<?>)o;
         return elements.equals(other.elements);
     }
 }
