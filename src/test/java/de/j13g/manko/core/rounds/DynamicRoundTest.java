@@ -1,5 +1,7 @@
-package de.j13g.manko.core;
+package de.j13g.manko.core.rounds;
 
+import de.j13g.manko.core.Pairing;
+import de.j13g.manko.core.TestEntrant;
 import de.j13g.manko.core.exceptions.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

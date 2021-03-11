@@ -1,5 +1,7 @@
-package de.j13g.manko.core;
+package de.j13g.manko.core.rounds;
 
+import de.j13g.manko.core.Pairing;
+import de.j13g.manko.core.Results;
 import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.base.EliminationRound;
 import de.j13g.manko.util.ShuffledSet;
