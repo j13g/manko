@@ -2,7 +2,7 @@ package de.j13g.manko.core.rounds;
 
 import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.managers.PairingManager;
-import de.j13g.manko.core.managers.ResultsManager;
+import de.j13g.manko.core.managers.ResultManager;
 import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.base.EliminationRound;
 import de.j13g.manko.util.ShuffledSet;
@@ -17,8 +17,8 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     private final HashSet<E> entrants = new HashSet<>();
     private final ShuffledSet<E> pendingEntrants = new ShuffledSet<>();
 
-    private final ResultsManager<E> results = new ResultsManager<>();
-    private final ResultsManager<E> floatingResults = new ResultsManager<>();
+    private final ResultManager<E> results = new ResultManager<>();
+    private final ResultManager<E> floatingResults = new ResultManager<>();
 
     private final PairingManager<E> pairings = new PairingManager<>();
 

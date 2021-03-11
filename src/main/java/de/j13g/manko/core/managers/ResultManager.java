@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ResultsManager<E> {
+public class ResultManager<E> {
 
     private final HashSet<E> advanced = new HashSet<>();
     private final HashSet<E> eliminated = new HashSet<>();
@@ -35,7 +35,7 @@ public class ResultsManager<E> {
      * @param entrant The entrant.
      * @return If the entrant was moved.
      */
-    public boolean moveTo(ResultsManager<E> other, E entrant) {
+    public boolean moveTo(ResultManager<E> other, E entrant) {
         if (!contains(entrant))
             return false;
 
