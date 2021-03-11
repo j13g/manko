@@ -1,7 +1,7 @@
 package de.j13g.manko.core;
 
-import de.j13g.manko.core.base.EliminationRound;
 import de.j13g.manko.core.exceptions.*;
+import de.j13g.manko.core.base.EliminationRound;
 import de.j13g.manko.util.ShuffledSet;
 import de.j13g.manko.util.UniformPairLinkedBiSet;
 import de.j13g.manko.util.UniformPairUniqueBiSet;
@@ -25,11 +25,11 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
     public DynamicRound() {}
 
     public DynamicRound(Set<E> entrants) {
-        entrants.forEach(this::add);
+        entrants.forEach(this::addEntrant);
     }
 
     @Override
-    public boolean add(E entrant) {
+    public boolean addEntrant(E entrant) {
         if (entrants.contains(entrant))
             return false;
 
@@ -41,18 +41,6 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
         entrants.add(entrant);
         pendingEntrants.add(entrant);
         return true;
-    }
-
-    @Override
-    public Pairing<E> createPairing(E entrant1, E entrant2) throws NoSuchEntrantException, EntrantNotPendingException {
-        if (!contains(entrant1) || !contains(entrant2))
-            throw new NoSuchEntrantException();
-        if (!isPending(entrant1) || !isPending(entrant2))
-            throw new EntrantNotPendingException();
-
-        pendingEntrants.remove(entrant1);
-        pendingEntrants.remove(entrant2);
-        return registerPairing(entrant1, entrant2);
     }
 
     @Override
@@ -71,32 +59,56 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
     }
 
     @Override
-    public Pairing<E> declareWinner(E entrant) throws NoSuchEntrantException, MissingPairingException {
-        if (!contains(entrant))
+    public Pairing<E> declareWinner(E winningEntrant) throws NoSuchEntrantException, MissingPairingException {
+        if (!contains(winningEntrant))
             throw new NoSuchEntrantException();
 
-        Pairing<E> pairing = activePairings.findByElement(entrant);
+        Pairing<E> pairing = activePairings.findByElement(winningEntrant);
         if (pairing == null)
             throw new MissingPairingException();
 
-        results.advance(entrant);
-        results.eliminate(getOtherUnsafe(pairing, entrant));
-
-        finishedPairings.add(pairing);
-        activePairings.remove(pairing);
-
-        // Check that entrants don't end up where they shouldn't.
-        assert entrants.size() == 2 * activePairings.size() +
-            finishedPairings.getPairElementSet().size() + pendingEntrants.size();
-        assert entrants.size() == 2 * activePairings.size() +
-            results.getAdvanced().size() + results.getEliminated().size() + pendingEntrants.size();
+        try {
+            declareWinner(winningEntrant, pairing);
+        } catch (NoSuchPairingException e) {
+            throw new RuntimeException(e);
+        }
 
         return pairing;
     }
 
     @Override
+    public void declareWinner(E winningEntrant, Pairing<E> pairing)
+            throws NoSuchEntrantException, NoSuchPairingException {
+
+        if (!pairing.contains(winningEntrant))
+            throw new IllegalArgumentException("The entrant is not part of the pairing");
+
+        if (!contains(winningEntrant))
+            throw new NoSuchEntrantException();
+
+        if (!activePairings.contains(pairing))
+            throw new NoSuchPairingException();
+
+        results.advance(winningEntrant);
+        results.eliminate(getOtherUnsafe(pairing, winningEntrant));
+
+        finishPairing(pairing);
+    }
+
+    @Override
+    public void declareTie(Pairing<E> pairing)
+            throws NoSuchPairingException {
+
+        if (!activePairings.contains(pairing))
+            throw new NoSuchPairingException();
+
+        finishPairing(pairing);
+    }
+
+    @Override
     public boolean replayPairing(Pairing<E> pairing)
-            throws NoSuchPairingException, MissingEntrantException, EntrantNotPendingException {
+            throws NoSuchPairingException, MissingEntrantException, OrphanedPairingException {
+
         if (activePairings.contains(pairing))
             return false;
         if (!finishedPairings.contains(pairing))
@@ -110,27 +122,22 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
         if (!contains(first) || !contains(second))
             throw new MissingEntrantException();
 
-        boolean firstHasResult = hasResult(first);
-        boolean secondHasResult = hasResult(second);
-        assert firstHasResult || secondHasResult;
-
-        if (!firstHasResult || !secondHasResult) {
-            E withoutResult = firstHasResult ? second : first;
-            if (!isPending(withoutResult))
-                throw new EntrantNotPendingException();
-        }
+        if (isPairingOrphaned(pairing))
+            throw new OrphanedPairingException();
 
         results.reset(first);
         results.reset(second);
         finishedPairings.remove(pairing);
 
+        pendingEntrants.remove(first);
+        pendingEntrants.remove(second);
         registerPairing(first, second);
 
-        return true; // TODO
+        return true;
     }
 
     @Override
-    public boolean reset(E entrant) {
+    public boolean resetEntrant(E entrant) {
         if (!hasStateAbout(entrant) || isPending(entrant))
             return false;
 
@@ -167,7 +174,7 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
     }
 
     @Override
-    public boolean remove(E entrant) {
+    public boolean removeEntrant(E entrant) {
         if (isPending(entrant)) {
             pendingEntrants.remove(entrant);
         }
@@ -190,6 +197,29 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
     }
 
     @Override
+    public boolean isPairingOrphaned(Pairing<E> pairing)
+            throws NoSuchPairingException {
+
+        if (activePairings.contains(pairing))
+            return false;
+        if (!finishedPairings.contains(pairing))
+            throw new NoSuchPairingException();
+
+        E first = pairing.getFirst();
+        E second = pairing.getSecond();
+
+        // They're not in the same pairing,
+        // but one of them is in another pairing.
+        if (isPaired(first) || isPaired(second))
+            return true;
+
+        int nFinishedFirst = finishedPairings.findByElement(first).size();
+        int nFinishedSecond = finishedPairings.findByElement(second).size();
+
+        return nFinishedFirst > 1 && !isPending(first)
+            || nFinishedSecond > 1 && !isPending(second);
+    }
+
     public boolean contains(E entrant) {
         return entrants.contains(entrant);
     }
@@ -209,12 +239,10 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
         return results.contains(entrant);
     }
 
-    @Override
     public boolean isPending(E entrant) {
         return pendingEntrants.contains(entrant);
     }
 
-    @Override
     public boolean isPaired(E entrant) {
         return activePairings.findByElement(entrant) != null;
     }
@@ -233,7 +261,6 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
         return !getActivePairings().isEmpty();
     }
 
-    @Override
     public boolean isFinished() {
         // Assert either not finished or proper entrant distribution.
         assert !(pendingEntrants.isEmpty() && activePairings.isEmpty())
@@ -242,17 +269,14 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
         return pendingEntrants.isEmpty() && activePairings.isEmpty();
     }
 
-    @Override
     public Set<E> getPendingEntrants() {
         return pendingEntrants.elements();
     }
 
-    @Override
     public Set<Pairing<E>> getActivePairings() {
         return activePairings.elements();
     }
 
-    @Override
     public Set<Pairing<E>> getFinishedPairings() {
         return finishedPairings.elements();
     }
@@ -270,19 +294,34 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
     /**
      * Creates a new pairing with two participants.
      * Does not check if the participants are part of the round or are pending.
-     * @param entrant1 The first entrant.
-     * @param entrant2 The second entrant.
+     * @param first The first entrant.
+     * @param second The second entrant.
      * @return The created pairing containing both entrants.
      */
-    private Pairing<E> registerPairing(E entrant1, E entrant2) {
+    private Pairing<E> registerPairing(E first, E second) {
 
-        Pairing<E> pairing = new Pairing<>(entrant1, entrant2);
+        Pairing<E> pairing = new Pairing<>(first, second);
 
         assert !activePairings.contains(pairing);
         assert !finishedPairings.contains(pairing);
+        assert !isPending(first) && !isPending(second);
+        assert !hasResult(first) && !hasResult(second);
 
         activePairings.add(pairing);
         return pairing;
+    }
+
+    private void finishPairing(Pairing<E> pairing) {
+        assert activePairings.contains(pairing);
+
+        finishedPairings.add(pairing);
+        activePairings.remove(pairing);
+
+        // Check that entrants don't end up where they shouldn't.
+        assert entrants.size() == 2 * activePairings.size() +
+                finishedPairings.getPairElementSet().size() + pendingEntrants.size();
+        assert entrants.size() == 2 * activePairings.size() +
+                results.getAdvanced().size() + results.getEliminated().size() + pendingEntrants.size();
     }
 
     private E getOtherUnsafe(Pairing<E> pairing, E entrant) {

@@ -6,19 +6,16 @@ import java.io.Serializable;
 
 /**
  * A pairing between two entrants.
- * @param <E> The type of the entrant.
+ * @param <E> The entrant type.
  */
 public class Pairing<E> extends UniformPair<E> implements Serializable {
 
-    public Pairing(E entrant1, E entrant2) {
-        super(entrant1, entrant2);
-    }
-
-    public E getEntrant1() {
-        return getFirst();
-    }
-
-    public E getEntrant2() {
-        return getSecond();
+    /**
+     * Creates a pairing between two entrants.
+     * @param first The first entrant.
+     * @param second The second entrant.
+     */
+    public Pairing(E first, E second) {
+        super(first, second);
     }
 }

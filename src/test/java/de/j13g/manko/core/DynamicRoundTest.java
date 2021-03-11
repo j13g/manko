@@ -3,7 +3,6 @@ package de.j13g.manko.core;
 import de.j13g.manko.core.exceptions.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -42,17 +41,17 @@ public class DynamicRoundTest {
         emptyRound = new DynamicRound<>();
 
         oneEntrantRound = new DynamicRound<>();
-        oneEntrantRound.add(first);
+        oneEntrantRound.addEntrant(first);
 
         twoEntrantRound = new DynamicRound<>();
-        twoEntrantRound.add(first);
-        twoEntrantRound.add(second);
+        twoEntrantRound.addEntrant(first);
+        twoEntrantRound.addEntrant(second);
 
         multiEntrantRound = createMultiEntrantRound();
 
         singlePairRound = new DynamicRound<>();
-        singlePairRound.add(first);
-        singlePairRound.add(second);
+        singlePairRound.addEntrant(first);
+        singlePairRound.addEntrant(second);
         assertDoesNotThrow(() -> singlePairRound.nextPairing());
 
         singlePairFinishedRound = createSinglePairFinishedRound();
@@ -65,14 +64,14 @@ public class DynamicRoundTest {
     private DynamicRound<TestEntrant> createMultiEntrantRound() {
         DynamicRound<TestEntrant> round = new DynamicRound<>();
         for (TestEntrant entrant : entrants)
-            round.add(entrant);
+            round.addEntrant(entrant);
         return round;
     }
 
     private DynamicRound<TestEntrant> createSinglePairFinishedRound() {
         DynamicRound<TestEntrant> round = new DynamicRound<>();
-        round.add(first);
-        round.add(second);
+        round.addEntrant(first);
+        round.addEntrant(second);
         assertDoesNotThrow(round::nextPairing);
         assertDoesNotThrow(() -> round.declareWinner(first));
         return round;
@@ -83,45 +82,30 @@ public class DynamicRoundTest {
         return round.getFinishedPairings().iterator().next();
     }
 
-    // add()
+    // addEntrant()
 
     @Test
     void emptyRound_addEntrant_returnsTrue() {
-        assertTrue(emptyRound.add(first));
+        assertTrue(emptyRound.addEntrant(first));
     }
 
     @Test
     void oneEntrantRound_addEntrantAgain_returnsFalse() {
-        assertFalse(oneEntrantRound.add(first));
+        assertFalse(oneEntrantRound.addEntrant(first));
     }
 
     @Test
     void emptyRound_addEntrant_isPending() {
-        emptyRound.add(first);
+        emptyRound.addEntrant(first);
         assertTrue(emptyRound.isPending(first));
     }
 
     @Test
     void singlePairFinishedRound_removeAdvancedThenAddBack_isAdvanced() {
-        singlePairFinishedRound.remove(winner);
-        singlePairFinishedRound.add(winner);
+        singlePairFinishedRound.removeEntrant(winner);
+        singlePairFinishedRound.addEntrant(winner);
         assertTrue(singlePairFinishedRound.isAdvanced(winner));
         assertFalse(singlePairFinishedRound.isPending(winner));
-    }
-
-    // createPairing()
-
-    @Test
-    void notEnoughEntrants_pair_throwsNoSuchEntrantException() {
-        assertThrows(NoSuchEntrantException.class, () -> emptyRound.createPairing(first, second));
-        assertThrows(NoSuchEntrantException.class, () -> oneEntrantRound.createPairing(first, second));
-    }
-
-    @Test
-    void multiEntrantRound_pairWithPaired_throwsEntrantNotPendingException() {
-        Pairing<TestEntrant> pairing = assertDoesNotThrow(() -> multiEntrantRound.createPairing(first, second));
-        assertThrows(EntrantNotPendingException.class, () ->
-            multiEntrantRound.createPairing(pairing.getEntrant1(), third));
     }
 
     // nextPairing()
@@ -160,8 +144,8 @@ public class DynamicRoundTest {
 
     @Test
     void singlePairFinishedRound_resetPairedEntrantsAndPairRandomAgain_entrantsArePaired() {
-        singlePairFinishedRound.reset(winner);
-        singlePairFinishedRound.reset(loser);
+        singlePairFinishedRound.resetEntrant(winner);
+        singlePairFinishedRound.resetEntrant(loser);
         Assertions.assertDoesNotThrow(singlePairFinishedRound::nextPairing);
         assertTrue(singlePairFinishedRound.isPaired(winner));
         assertTrue(singlePairFinishedRound.isPaired(loser));
@@ -171,12 +155,12 @@ public class DynamicRoundTest {
     void multiEntrantRound_finishParallelPairingsOutOfOrder_identicalToInOrder() throws Exception {
         Pairing<TestEntrant> p1 = multiEntrantRound.nextPairing();
         Pairing<TestEntrant> p2 = multiEntrantRound.nextPairing();
-        multiEntrantRound.declareWinner(p2.getEntrant1());
-        multiEntrantRound.declareWinner(p1.getEntrant2());
-        assertTrue(multiEntrantRound.isAdvanced(p1.getEntrant2()));
-        assertTrue(multiEntrantRound.isAdvanced(p2.getEntrant1()));
-        assertTrue(multiEntrantRound.isEliminated(p1.getEntrant1()));
-        assertTrue(multiEntrantRound.isEliminated(p2.getEntrant2()));
+        multiEntrantRound.declareWinner(p2.getFirst());
+        multiEntrantRound.declareWinner(p1.getSecond());
+        assertTrue(multiEntrantRound.isAdvanced(p1.getSecond()));
+        assertTrue(multiEntrantRound.isAdvanced(p2.getFirst()));
+        assertTrue(multiEntrantRound.isEliminated(p1.getFirst()));
+        assertTrue(multiEntrantRound.isEliminated(p2.getSecond()));
     }
 
     // declareWinner()
@@ -215,10 +199,10 @@ public class DynamicRoundTest {
 
     @Test
     void multiPairRound_declareAllWinners_finishedPairingsAreOrderedChronologically() throws Exception {
-        List<TestEntrant> winners = Arrays.asList(first, second, third);
-        for (int i = 0; i < winners.size(); ++i) {
-            TestEntrant loser = entrants.get(winners.size() + i);
-            multiEntrantRound.createPairing(winners.get(i), loser);
+        List<TestEntrant> winners = new ArrayList<>();
+        while (multiEntrantRound.getPendingEntrants().size() >= 2) {
+            Pairing<TestEntrant> pairing = multiEntrantRound.nextPairing();
+            winners.add(pairing.getFirst());
         }
 
         Collections.shuffle(winners);
@@ -260,7 +244,7 @@ public class DynamicRoundTest {
     @Test
     void singlePairFinishedRound_resetFirstEntrantAndReplayPairing_bothEntrantsArePaired() {
         Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
-        singlePairFinishedRound.reset(first);
+        singlePairFinishedRound.resetEntrant(first);
         assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
         assertTrue(singlePairFinishedRound.getActivePairings().contains(pairing));
         assertFalse(singlePairFinishedRound.hasResult(first));
@@ -268,30 +252,38 @@ public class DynamicRoundTest {
     }
 
     @Test
-    void singlePairFinishedRound_resetFirstAndPairWithThirdThenReplayFirstPairing_throwsEntrantNotPendingException() {
+    void singlePairFinishedRound_resetFirstAndPairWithThirdThenReplayFirstPairing_throwsOrphanedPairingException() {
         Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
-        singlePairFinishedRound.add(third);
-        singlePairFinishedRound.reset(first);
-        assertDoesNotThrow(() -> singlePairFinishedRound.createPairing(first, third));
-        assertThrows(EntrantNotPendingException.class, () -> singlePairFinishedRound.replayPairing(pairing));
+        singlePairFinishedRound.addEntrant(third);
+        singlePairFinishedRound.resetEntrant(first);
+
+        // The first entrant is already paired with the third entrant.
+        assertDoesNotThrow(() -> singlePairFinishedRound.nextPairing());
+        assertThrows(OrphanedPairingException.class, () -> singlePairFinishedRound.replayPairing(pairing));
+
+        // The first entrant is now in another finished round.
+        assertDoesNotThrow(() -> singlePairFinishedRound.declareWinner(first));
+        assertThrows(OrphanedPairingException.class, () -> singlePairFinishedRound.replayPairing(pairing));
 
         // Resetting that entrant and then replaying should work.
-        singlePairFinishedRound.reset(first);
+        singlePairFinishedRound.resetEntrant(first);
         assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
+        assertTrue(singlePairFinishedRound.isPaired(pairing.getFirst()));
+        assertTrue(singlePairFinishedRound.isPaired(pairing.getSecond()));
     }
 
     @Test
     void singlePairFinishedRound_removeBothEntrantsAndReplayPairing_throwsMissingEntrantException() {
         Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
-        singlePairFinishedRound.remove(first);
-        singlePairFinishedRound.remove(second);
+        singlePairFinishedRound.removeEntrant(first);
+        singlePairFinishedRound.removeEntrant(second);
         assertThrows(MissingEntrantException.class, () -> singlePairFinishedRound.replayPairing(pairing));
     }
 
     @Test
     void singlePairFinishedRound_removeFirstEntrantAndReplayPairing_throwsMissingEntrantException() {
         Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
-        singlePairFinishedRound.remove(first);
+        singlePairFinishedRound.removeEntrant(first);
         assertThrows(MissingEntrantException.class, () -> singlePairFinishedRound.replayPairing(pairing));
     }
 
@@ -299,82 +291,82 @@ public class DynamicRoundTest {
 
     @Test
     void singleEntrantRound_resetEntrant_isPending() {
-        singlePairRound.reset(first);
+        singlePairRound.resetEntrant(first);
         assertTrue(singlePairRound.isPending(first));
     }
 
     @Test
     void singleEntrantRound_resetInvalidEntrant_returnsFalse() {
-        assertFalse(singlePairRound.reset(invalidEntrant));
+        assertFalse(singlePairRound.resetEntrant(invalidEntrant));
         assertFalse(singlePairRound.isPending(invalidEntrant));
     }
 
     @Test
     void singlePairRound_resetFirst_isPending() {
-        singlePairRound.reset(first);
+        singlePairRound.resetEntrant(first);
         assertTrue(singlePairRound.isPending(first));
         assertFalse(singlePairRound.isPaired(first));
     }
 
     @Test
     void singlePairRound_resetFirst_secondIsPending() {
-        singlePairRound.reset(second);
+        singlePairRound.resetEntrant(second);
         assertTrue(singlePairRound.isPending(second));
         assertFalse(singlePairRound.isPaired(second));
     }
 
     @Test
     void singlePairFinishedRound_resetAdvanced_isPending() {
-        singlePairFinishedRound.reset(winner);
+        singlePairFinishedRound.resetEntrant(winner);
         assertFalse(singlePairFinishedRound.isAdvanced(winner));
         assertTrue(singlePairFinishedRound.isPending(winner));
     }
 
     @Test
     void singlePairFinishedRound_resetAdvanced_eliminatedIsStillEliminated() {
-        singlePairFinishedRound.reset(winner);
+        singlePairFinishedRound.resetEntrant(winner);
         assertTrue(singlePairFinishedRound.isEliminated(loser));
     }
 
     @Test
     void singlePairFinishedRound_resetFloatingAdvanced_isCompletelyRemoved() {
-        singlePairFinishedRound.remove(winner);
-        singlePairFinishedRound.reset(winner);
+        singlePairFinishedRound.removeEntrant(winner);
+        singlePairFinishedRound.resetEntrant(winner);
         assertFalse(singlePairFinishedRound.contains(winner));
         assertFalse(singlePairFinishedRound.isAdvanced(winner));
     }
 
     @Test
     void singlePairFinishedRound_resetAdvanced_keepsFinishedPairing() {
-        singlePairFinishedRound.reset(winner);
+        singlePairFinishedRound.resetEntrant(winner);
         assertEquals(1, singlePairFinishedRound.getFinishedPairings().size());
     }
 
     @Test
     void singlePairFinishedRound_resetAdvancedAndEliminated_removesFinishedPairing() {
-        singlePairFinishedRound.reset(winner);
-        singlePairFinishedRound.reset(loser);
+        singlePairFinishedRound.resetEntrant(winner);
+        singlePairFinishedRound.resetEntrant(loser);
         assertTrue(singlePairFinishedRound.getFinishedPairings().isEmpty());
     }
 
     @Test
     void singlePairFinishedRound_removeWinnerAndResetLoser_finishedPairingStillExists() {
-        singlePairFinishedRound.remove(winner);
-        singlePairFinishedRound.reset(loser);
+        singlePairFinishedRound.removeEntrant(winner);
+        singlePairFinishedRound.resetEntrant(loser);
         assertEquals(1, singlePairFinishedRound.getFinishedPairings().size());
     }
 
     @Test
     void threeEntrantRound_resetLoserThenPairAgainstOther_hasTwoFinishedPairings() throws Exception {
-        twoEntrantRound.add(third);
+        twoEntrantRound.addEntrant(third);
         DynamicRound<TestEntrant> threeEntrantRound = twoEntrantRound;
 
         Pairing<TestEntrant> firstPairing = threeEntrantRound.nextPairing();
-        TestEntrant firstWinner = firstPairing.getEntrant1();
-        TestEntrant firstLoser = firstPairing.getEntrant2();
+        TestEntrant firstWinner = firstPairing.getFirst();
+        TestEntrant firstLoser = firstPairing.getSecond();
 
         threeEntrantRound.declareWinner(firstWinner);
-        threeEntrantRound.reset(firstLoser);
+        threeEntrantRound.resetEntrant(firstLoser);
 
         Pairing<TestEntrant> secondPairing = threeEntrantRound.nextPairing();
         TestEntrant secondLoser = secondPairing.getOther(firstLoser);
@@ -388,7 +380,7 @@ public class DynamicRoundTest {
 
         // After resetting this player which participated in both pairings,
         // those pairings should still exist.
-        threeEntrantRound.reset(firstLoser);
+        threeEntrantRound.resetEntrant(firstLoser);
         assertEquals(2, threeEntrantRound.getFinishedPairings().size());
     }
 
@@ -396,7 +388,7 @@ public class DynamicRoundTest {
 
     @Test
     void singlePairRound_removeFirst_isRemoved() {
-        singlePairRound.remove(first);
+        singlePairRound.removeEntrant(first);
         assertFalse(singlePairRound.contains(first));
         assertFalse(singlePairRound.isPending(first));
         assertFalse(singlePairRound.isPaired(first));
@@ -404,29 +396,29 @@ public class DynamicRoundTest {
 
     @Test
     void singlePairFinishedRound_removeWinnerAgain_returnsFalse() {
-        singlePairFinishedRound.remove(winner);
-        assertFalse(singlePairFinishedRound.remove(winner));
+        singlePairFinishedRound.removeEntrant(winner);
+        assertFalse(singlePairFinishedRound.removeEntrant(winner));
     }
 
     @Test
     void singlePairRound_removeFirst_secondIsPending() {
-        singlePairRound.remove(first);
+        singlePairRound.removeEntrant(first);
         assertTrue(singlePairRound.isPending(second));
         assertFalse(singlePairRound.isPaired(second));
     }
 
     @Test
     void singlePairFinishedRound_removeAdvanced_isRemoved() {
-        assertTrue(singlePairFinishedRound.remove(winner));
+        assertTrue(singlePairFinishedRound.removeEntrant(winner));
         assertFalse(singlePairFinishedRound.contains(winner));
     }
 
     @Test
     void singlePairFinishedRound_removeAndResetAllEntrants_completelyEmptyRound() {
-        singlePairFinishedRound.remove(first);
-        singlePairFinishedRound.remove(second);
-        singlePairFinishedRound.reset(first);
-        singlePairFinishedRound.reset(second);
+        singlePairFinishedRound.removeEntrant(first);
+        singlePairFinishedRound.removeEntrant(second);
+        singlePairFinishedRound.resetEntrant(first);
+        singlePairFinishedRound.resetEntrant(second);
         assertFalse(singlePairFinishedRound.hasStateAbout(first));
         assertFalse(singlePairFinishedRound.hasStateAbout(second));
         assertTrue(singlePairFinishedRound.getPendingEntrants().isEmpty());
@@ -448,7 +440,7 @@ public class DynamicRoundTest {
 
     @Test
     void singlePairFinishedRound_removeAdvanced_isStillFinished() {
-        singlePairFinishedRound.remove(winner);
+        singlePairFinishedRound.removeEntrant(winner);
         assertTrue(singlePairFinishedRound.isFinished());
     }
 
@@ -458,10 +450,10 @@ public class DynamicRoundTest {
     void singlePairFinishedRound_resetThenRemoveAdvanced_identicalToRemoveThenResetAdvanced() {
         DynamicRound<TestEntrant> otherRound = createSinglePairFinishedRound();
 
-        singlePairFinishedRound.reset(winner);
-        singlePairFinishedRound.remove(winner);
-        otherRound.remove(winner);
-        otherRound.reset(winner);
+        singlePairFinishedRound.resetEntrant(winner);
+        singlePairFinishedRound.removeEntrant(winner);
+        otherRound.removeEntrant(winner);
+        otherRound.resetEntrant(winner);
 
         assertEquals(singlePairFinishedRound.contains(winner), otherRound.contains(winner));
         assertEquals(singlePairFinishedRound.hasStateAbout(winner), otherRound.hasStateAbout(winner));
@@ -482,7 +474,7 @@ public class DynamicRoundTest {
             assertDoesNotThrow(() -> {
                 DynamicRound<TestEntrant> round = createMultiEntrantRound();
                 Pairing<TestEntrant> pairing = round.nextPairing();
-                return pairing.getEntrant1();
+                return pairing.getFirst();
             })
         );
     }

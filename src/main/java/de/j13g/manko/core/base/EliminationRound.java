@@ -1,28 +1,21 @@
 package de.j13g.manko.core.base;
 
+import de.j13g.manko.core.Pairing;
+import de.j13g.manko.core.exceptions.NoSuchPairingException;
+
 import java.util.Set;
 
-public interface EliminationRound<E> extends Round<E>, WithExplicitPair<E> {
+public interface EliminationRound<E> extends Round<E> {
 
     /**
-     * Add an entrant to this round.
-     * @param entrant The entrant.
-     * @return If the entrant was not already in this round.
+     * Checks if a pairing is orphaned.
+     * An orphaned pairing is a pairing where one entrant
+     * is involved in another pairing that is finished.
+     * @param pairing The pairing to check.
+     * @return If the pairing is orphaned.
      */
-    boolean add(E entrant);
-
-    /**
-     * Resets an entrant back to the pending state.
-     * If the entrant was removed left over state is cleared.
-     * @param entrant The entrant.
-     * @return If the reset lead to any changes.
-     */
-    boolean reset(E entrant);
-
-    // NOTE: One cannot reset a player in every type of round.
-    //  In the finale a reset is not necessary as you won't pair
-    //  entrants manually (to give someone a second chance for instance)
-    //  and replaying a pairing has a dedicated method.
+    boolean isPairingOrphaned(Pairing<E> pairing)
+            throws NoSuchPairingException;
 
     /**
      * @param entrant The entrant.
@@ -42,7 +35,13 @@ public interface EliminationRound<E> extends Round<E>, WithExplicitPair<E> {
      */
     boolean isEliminated(E entrant);
 
+    /**
+     * @return Entrants that have advanced to the next round.
+     */
     Set<E> getAdvancedEntrants();
 
+    /**
+     * @return Entrants that were eliminated.
+     */
     Set<E> getEliminatedEntrants();
 }
