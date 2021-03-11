@@ -1,8 +1,8 @@
 package de.j13g.manko.core.rounds;
 
 import de.j13g.manko.core.Pairing;
-import de.j13g.manko.core.PairingManager;
-import de.j13g.manko.core.ResultsManager;
+import de.j13g.manko.core.managers.PairingManager;
+import de.j13g.manko.core.managers.ResultsManager;
 import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.base.EliminationRound;
 import de.j13g.manko.util.ShuffledSet;
@@ -85,7 +85,6 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
         if (!contains(winningEntrant))
             throw new NoSuchEntrantException();
-
         if (!pairings.isActive(pairing))
             throw new NoSuchPairingException();
 

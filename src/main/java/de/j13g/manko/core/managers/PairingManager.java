@@ -1,5 +1,6 @@
-package de.j13g.manko.core;
+package de.j13g.manko.core.managers;
 
+import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.exceptions.NoSuchPairingException;
 import de.j13g.manko.util.UniformPairLinkedBiSet;
 import de.j13g.manko.util.UniformPairUniqueBiSet;

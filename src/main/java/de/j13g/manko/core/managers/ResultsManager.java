@@ -1,4 +1,4 @@
-package de.j13g.manko.core;
+package de.j13g.manko.core.managers;
 
 import java.util.Collections;
 import java.util.HashSet;
