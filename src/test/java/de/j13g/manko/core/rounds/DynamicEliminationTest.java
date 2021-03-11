@@ -79,15 +79,15 @@ public class DynamicEliminationTest extends BaseRoundTest {
     @Test
     void emptyRound_addEntrant_isPending() {
         emptyRound.addEntrant(first);
-        assertTrue(emptyRound.isPending(first));
+        assertTrue(emptyRound.isEntrantPending(first));
     }
 
     @Test
     void singlePairFinishedRound_removeAdvancedThenAddBack_isAdvanced() {
         singlePairFinishedRound.removeEntrant(winner);
         singlePairFinishedRound.addEntrant(winner);
-        assertTrue(singlePairFinishedRound.isAdvanced(winner));
-        assertFalse(singlePairFinishedRound.isPending(winner));
+        assertTrue(singlePairFinishedRound.isEntrantAdvanced(winner));
+        assertFalse(singlePairFinishedRound.isEntrantPending(winner));
     }
 
     // nextPairing()
@@ -111,10 +111,10 @@ public class DynamicEliminationTest extends BaseRoundTest {
     @Test
     void twoEntrantRound_nextPairing_bothEntrantsArePaired() {
         Assertions.assertDoesNotThrow(twoEntrantRound::nextPairing);
-        assertFalse(twoEntrantRound.isPending(first));
-        assertFalse(twoEntrantRound.isPending(second));
-        assertTrue(twoEntrantRound.isPaired(first));
-        assertTrue(twoEntrantRound.isPaired(second));
+        assertFalse(twoEntrantRound.isEntrantPending(first));
+        assertFalse(twoEntrantRound.isEntrantPending(second));
+        assertTrue(twoEntrantRound.isEntrantPaired(first));
+        assertTrue(twoEntrantRound.isEntrantPaired(second));
     }
 
     @Test
@@ -129,8 +129,8 @@ public class DynamicEliminationTest extends BaseRoundTest {
         singlePairFinishedRound.resetEntrant(winner);
         singlePairFinishedRound.resetEntrant(loser);
         Assertions.assertDoesNotThrow(singlePairFinishedRound::nextPairing);
-        assertTrue(singlePairFinishedRound.isPaired(winner));
-        assertTrue(singlePairFinishedRound.isPaired(loser));
+        assertTrue(singlePairFinishedRound.isEntrantPaired(winner));
+        assertTrue(singlePairFinishedRound.isEntrantPaired(loser));
     }
 
     @Test
@@ -139,10 +139,10 @@ public class DynamicEliminationTest extends BaseRoundTest {
         Pairing<TestEntrant> p2 = multiEntrantRound.nextPairing();
         multiEntrantRound.declareWinner(p2.getFirst());
         multiEntrantRound.declareWinner(p1.getSecond());
-        assertTrue(multiEntrantRound.isAdvanced(p1.getSecond()));
-        assertTrue(multiEntrantRound.isAdvanced(p2.getFirst()));
-        assertTrue(multiEntrantRound.isEliminated(p1.getFirst()));
-        assertTrue(multiEntrantRound.isEliminated(p2.getSecond()));
+        assertTrue(multiEntrantRound.isEntrantAdvanced(p1.getSecond()));
+        assertTrue(multiEntrantRound.isEntrantAdvanced(p2.getFirst()));
+        assertTrue(multiEntrantRound.isEntrantEliminated(p1.getFirst()));
+        assertTrue(multiEntrantRound.isEntrantEliminated(p2.getSecond()));
     }
 
     // declareWinner()
@@ -160,10 +160,10 @@ public class DynamicEliminationTest extends BaseRoundTest {
     @Test
     void singlePairRound_declareFirstWinner_winnerAdvancedAndLoserEliminated() throws Exception {
         singlePairRound.declareWinner(winner);
-        assertFalse(singlePairRound.isPaired(winner));
-        assertFalse(singlePairRound.isPaired(loser));
-        assertTrue(singlePairRound.isAdvanced(winner));
-        assertTrue(singlePairRound.isEliminated(loser));
+        assertFalse(singlePairRound.isEntrantPaired(winner));
+        assertFalse(singlePairRound.isEntrantPaired(loser));
+        assertTrue(singlePairRound.isEntrantAdvanced(winner));
+        assertTrue(singlePairRound.isEntrantEliminated(loser));
     }
 
     @Test
@@ -219,8 +219,8 @@ public class DynamicEliminationTest extends BaseRoundTest {
         Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
         assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
         assertTrue(singlePairFinishedRound.getActivePairings().contains(pairing));
-        assertFalse(singlePairFinishedRound.hasResult(first));
-        assertFalse(singlePairFinishedRound.hasResult(second));
+        assertFalse(singlePairFinishedRound.hasEntrantResult(first));
+        assertFalse(singlePairFinishedRound.hasEntrantResult(second));
     }
 
     @Test
@@ -229,8 +229,8 @@ public class DynamicEliminationTest extends BaseRoundTest {
         singlePairFinishedRound.resetEntrant(first);
         assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
         assertTrue(singlePairFinishedRound.getActivePairings().contains(pairing));
-        assertFalse(singlePairFinishedRound.hasResult(first));
-        assertFalse(singlePairFinishedRound.hasResult(second));
+        assertFalse(singlePairFinishedRound.hasEntrantResult(first));
+        assertFalse(singlePairFinishedRound.hasEntrantResult(second));
     }
 
     @Test
@@ -250,8 +250,8 @@ public class DynamicEliminationTest extends BaseRoundTest {
         // Resetting that entrant and then replaying should work.
         singlePairFinishedRound.resetEntrant(first);
         assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
-        assertTrue(singlePairFinishedRound.isPaired(pairing.getFirst()));
-        assertTrue(singlePairFinishedRound.isPaired(pairing.getSecond()));
+        assertTrue(singlePairFinishedRound.isEntrantPaired(pairing.getFirst()));
+        assertTrue(singlePairFinishedRound.isEntrantPaired(pairing.getSecond()));
     }
 
     @Test
@@ -274,48 +274,48 @@ public class DynamicEliminationTest extends BaseRoundTest {
     @Test
     void singleEntrantRound_resetEntrant_isPending() {
         singlePairRound.resetEntrant(first);
-        assertTrue(singlePairRound.isPending(first));
+        assertTrue(singlePairRound.isEntrantPending(first));
     }
 
     @Test
     void singleEntrantRound_resetInvalidEntrant_returnsFalse() {
         assertFalse(singlePairRound.resetEntrant(invalidEntrant));
-        assertFalse(singlePairRound.isPending(invalidEntrant));
+        assertFalse(singlePairRound.isEntrantPending(invalidEntrant));
     }
 
     @Test
     void singlePairRound_resetFirst_isPending() {
         singlePairRound.resetEntrant(first);
-        assertTrue(singlePairRound.isPending(first));
-        assertFalse(singlePairRound.isPaired(first));
+        assertTrue(singlePairRound.isEntrantPending(first));
+        assertFalse(singlePairRound.isEntrantPaired(first));
     }
 
     @Test
     void singlePairRound_resetFirst_secondIsPending() {
         singlePairRound.resetEntrant(second);
-        assertTrue(singlePairRound.isPending(second));
-        assertFalse(singlePairRound.isPaired(second));
+        assertTrue(singlePairRound.isEntrantPending(second));
+        assertFalse(singlePairRound.isEntrantPaired(second));
     }
 
     @Test
     void singlePairFinishedRound_resetAdvanced_isPending() {
         singlePairFinishedRound.resetEntrant(winner);
-        assertFalse(singlePairFinishedRound.isAdvanced(winner));
-        assertTrue(singlePairFinishedRound.isPending(winner));
+        assertFalse(singlePairFinishedRound.isEntrantAdvanced(winner));
+        assertTrue(singlePairFinishedRound.isEntrantPending(winner));
     }
 
     @Test
     void singlePairFinishedRound_resetAdvanced_eliminatedIsStillEliminated() {
         singlePairFinishedRound.resetEntrant(winner);
-        assertTrue(singlePairFinishedRound.isEliminated(loser));
+        assertTrue(singlePairFinishedRound.isEntrantEliminated(loser));
     }
 
     @Test
     void singlePairFinishedRound_resetFloatingAdvanced_isCompletelyRemoved() {
         singlePairFinishedRound.removeEntrant(winner);
         singlePairFinishedRound.resetEntrant(winner);
-        assertFalse(singlePairFinishedRound.contains(winner));
-        assertFalse(singlePairFinishedRound.isAdvanced(winner));
+        assertFalse(singlePairFinishedRound.hasEntrant(winner));
+        assertFalse(singlePairFinishedRound.isEntrantAdvanced(winner));
     }
 
     @Test
@@ -355,9 +355,9 @@ public class DynamicEliminationTest extends BaseRoundTest {
 
         threeEntrantRound.declareWinner(firstLoser);
 
-        assertTrue(threeEntrantRound.isAdvanced(firstLoser));
-        assertTrue(threeEntrantRound.isAdvanced(firstWinner));
-        assertTrue(threeEntrantRound.isEliminated(secondLoser));
+        assertTrue(threeEntrantRound.isEntrantAdvanced(firstLoser));
+        assertTrue(threeEntrantRound.isEntrantAdvanced(firstWinner));
+        assertTrue(threeEntrantRound.isEntrantEliminated(secondLoser));
         assertEquals(2, threeEntrantRound.getFinishedPairings().size());
 
         // After resetting this player which participated in both pairings,
@@ -371,9 +371,9 @@ public class DynamicEliminationTest extends BaseRoundTest {
     @Test
     void singlePairRound_removeFirst_isRemoved() {
         singlePairRound.removeEntrant(first);
-        assertFalse(singlePairRound.contains(first));
-        assertFalse(singlePairRound.isPending(first));
-        assertFalse(singlePairRound.isPaired(first));
+        assertFalse(singlePairRound.hasEntrant(first));
+        assertFalse(singlePairRound.isEntrantPending(first));
+        assertFalse(singlePairRound.isEntrantPaired(first));
     }
 
     @Test
@@ -385,14 +385,14 @@ public class DynamicEliminationTest extends BaseRoundTest {
     @Test
     void singlePairRound_removeFirst_secondIsPending() {
         singlePairRound.removeEntrant(first);
-        assertTrue(singlePairRound.isPending(second));
-        assertFalse(singlePairRound.isPaired(second));
+        assertTrue(singlePairRound.isEntrantPending(second));
+        assertFalse(singlePairRound.isEntrantPaired(second));
     }
 
     @Test
     void singlePairFinishedRound_removeAdvanced_isRemoved() {
         assertTrue(singlePairFinishedRound.removeEntrant(winner));
-        assertFalse(singlePairFinishedRound.contains(winner));
+        assertFalse(singlePairFinishedRound.hasEntrant(winner));
     }
 
     @Test
@@ -417,7 +417,7 @@ public class DynamicEliminationTest extends BaseRoundTest {
     void singlePairRound_isFinished_returnsFalse() {
         // The round is not finished since there is an active pairing.
         assertFalse(singlePairRound.isFinished());
-        assertTrue(singlePairRound.hasActivePairings());
+        assertFalse(singlePairRound.getActivePairings().isEmpty());
     }
 
     @Test
@@ -437,7 +437,7 @@ public class DynamicEliminationTest extends BaseRoundTest {
         otherRound.removeEntrant(winner);
         otherRound.resetEntrant(winner);
 
-        assertEquals(singlePairFinishedRound.contains(winner), otherRound.contains(winner));
+        assertEquals(singlePairFinishedRound.hasEntrant(winner), otherRound.hasEntrant(winner));
         assertEquals(singlePairFinishedRound.hasStateAbout(winner), otherRound.hasStateAbout(winner));
     }
 

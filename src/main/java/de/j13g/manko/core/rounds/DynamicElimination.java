@@ -60,7 +60,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
     @Override
     public Pairing<E> declareWinner(E winningEntrant) throws NoSuchEntrantException, MissingPairingException {
-        if (!contains(winningEntrant))
+        if (!hasEntrant(winningEntrant))
             throw new NoSuchEntrantException();
 
         Pairing<E> pairing = pairings.findActiveByEntrant(winningEntrant);
@@ -83,7 +83,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         if (!pairing.contains(winningEntrant))
             throw new IllegalArgumentException("The entrant is not part of the pairing");
 
-        if (!contains(winningEntrant))
+        if (!hasEntrant(winningEntrant))
             throw new NoSuchEntrantException();
         if (!pairings.isActive(pairing))
             throw new NoSuchPairingException();
@@ -118,7 +118,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
         // One of the entrants could be removed,
         // since finished pairings are only removed if both entrants are gone.
-        if (!contains(first) || !contains(second))
+        if (!hasEntrant(first) || !hasEntrant(second))
             throw new MissingEntrantException();
 
         if (isPairingOrphaned(pairing))
@@ -137,15 +137,15 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
     @Override
     public boolean resetEntrant(E entrant) {
-        if (!hasStateAbout(entrant) || isPending(entrant))
+        if (!hasStateAbout(entrant) || isEntrantPending(entrant))
             return false;
 
-        if (isPaired(entrant)) {
+        if (isEntrantPaired(entrant)) {
             Pairing<E> pairing = pairings.removeActiveByEntrant(entrant);
             resetOtherUnsafe(pairing, entrant);
             pendingEntrants.add(entrant);
         }
-        else if (isAdvanced(entrant) || isEliminated(entrant)) {
+        else if (isEntrantAdvanced(entrant) || isEntrantEliminated(entrant)) {
             results.reset(entrant);
             pendingEntrants.add(entrant);
         }
@@ -165,7 +165,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         // i.e. the other entrant was reset before too.
         for (Pairing<E> pairing : entrantPairings) {
             E other = getOtherUnsafe(pairing, entrant);
-            if (!hasResult(other) && !floatingResults.contains(other))
+            if (!hasEntrantResult(other) && !floatingResults.contains(other))
                 pairings.removeFinished(pairing);
         }
 
@@ -174,15 +174,15 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
     @Override
     public boolean removeEntrant(E entrant) {
-        if (isPending(entrant)) {
+        if (isEntrantPending(entrant)) {
             pendingEntrants.remove(entrant);
         }
-        else if (isPaired(entrant)) {
+        else if (isEntrantPaired(entrant)) {
             Pairing<E> pairing = pairings.findActiveByEntrant(entrant);
             resetOtherUnsafe(pairing, entrant);
             pairings.removeActive(pairing);
         }
-        else if (isAdvanced(entrant) || isEliminated(entrant)) {
+        else if (isEntrantAdvanced(entrant) || isEntrantEliminated(entrant)) {
             boolean wasMoved = results.moveTo(floatingResults, entrant);
             // NOTE: Separate variable required so that
             // the assert does not have side effects.
@@ -193,6 +193,75 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         }
 
         return entrants.remove(entrant);
+    }
+
+    @Override
+    public Set<E> getEntrants() {
+        return Collections.unmodifiableSet(entrants);
+    }
+
+    @Override
+    public Set<Pairing<E>> getActivePairings() {
+        return pairings.getActive();
+    }
+
+    @Override
+    public Set<Pairing<E>> getFinishedPairings() {
+        return pairings.getFinished();
+    }
+
+    @Override
+    public Set<E> getPendingEntrants() {
+        return pendingEntrants.elements();
+    }
+
+    @Override
+    public Set<E> getAdvancedEntrants() {
+        return results.getAdvanced();
+    }
+
+    @Override
+    public Set<E> getEliminatedEntrants() {
+        return results.getEliminated();
+    }
+
+    @Override
+    public boolean hasEntrant(E entrant) {
+        return entrants.contains(entrant);
+    }
+
+    @Override
+    public boolean hasEntrantResult(E entrant) {
+        return results.contains(entrant);
+    }
+
+    @Override
+    public boolean isEntrantPending(E entrant) {
+        return pendingEntrants.contains(entrant);
+    }
+
+    @Override
+    public boolean isEntrantPaired(E entrant) {
+        return pairings.hasActiveEntrant(entrant);
+    }
+
+    @Override
+    public boolean isFinished() {
+        // Assert either not finished or proper entrant distribution.
+        assert !(pendingEntrants.isEmpty() && !pairings.hasActive())
+                || entrants.size() == results.getAdvanced().size() + results.getEliminated().size();
+
+        return pendingEntrants.isEmpty() && !pairings.hasActive();
+    }
+
+    @Override
+    public boolean isEntrantAdvanced(E entrant) {
+        return results.isAdvanced(entrant);
+    }
+
+    @Override
+    public boolean isEntrantEliminated(E entrant) {
+        return results.isEliminated(entrant);
     }
 
     @Override
@@ -209,18 +278,14 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
         // They're not in the same pairing,
         // but one of them is in another pairing.
-        if (isPaired(first) || isPaired(second))
+        if (isEntrantPaired(first) || isEntrantPaired(second))
             return true;
 
         int nFinishedFirst = pairings.findFinishedByEntrant(first).size();
         int nFinishedSecond = pairings.findFinishedByEntrant(second).size();
 
-        return nFinishedFirst > 1 && !isPending(first)
-            || nFinishedSecond > 1 && !isPending(second);
-    }
-
-    public boolean contains(E entrant) {
-        return entrants.contains(entrant);
+        return nFinishedFirst > 1 && !isEntrantPending(first)
+                || nFinishedSecond > 1 && !isEntrantPending(second);
     }
 
     /**
@@ -230,64 +295,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
      * @return If any state is associated to this entrant.
      */
     public boolean hasStateAbout(E entrant) {
-        return contains(entrant) || floatingResults.contains(entrant);
-    }
-
-    @Override
-    public boolean hasResult(E entrant) {
-        return results.contains(entrant);
-    }
-
-    public boolean isPending(E entrant) {
-        return pendingEntrants.contains(entrant);
-    }
-
-    public boolean isPaired(E entrant) {
-        return pairings.hasActiveEntrant(entrant);
-    }
-
-    @Override
-    public boolean isAdvanced(E entrant) {
-        return results.isAdvanced(entrant);
-    }
-
-    @Override
-    public boolean isEliminated(E entrant) {
-        return results.isEliminated(entrant);
-    }
-
-    public boolean hasActivePairings() {
-        return !getActivePairings().isEmpty();
-    }
-
-    public boolean isFinished() {
-        // Assert either not finished or proper entrant distribution.
-        assert !(pendingEntrants.isEmpty() && !pairings.hasActive())
-            || entrants.size() == results.getAdvanced().size() + results.getEliminated().size();
-
-        return pendingEntrants.isEmpty() && !pairings.hasActive();
-    }
-
-    public Set<E> getPendingEntrants() {
-        return pendingEntrants.elements();
-    }
-
-    public Set<Pairing<E>> getActivePairings() {
-        return pairings.getActive();
-    }
-
-    public Set<Pairing<E>> getFinishedPairings() {
-        return pairings.getFinished();
-    }
-
-    @Override
-    public Set<E> getAdvancedEntrants() {
-        return results.getAdvanced();
-    }
-
-    @Override
-    public Set<E> getEliminatedEntrants() {
-        return results.getEliminated();
+        return hasEntrant(entrant) || floatingResults.contains(entrant);
     }
 
     /**
@@ -302,8 +310,8 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         Pairing<E> pairing = new Pairing<>(first, second);
 
         assert !pairings.contains(pairing);
-        assert !isPending(first) && !isPending(second);
-        assert !hasResult(first) && !hasResult(second);
+        assert !isEntrantPending(first) && !isEntrantPending(second);
+        assert !hasEntrantResult(first) && !hasEntrantResult(second);
 
         pairings.add(pairing);
         return pairing;

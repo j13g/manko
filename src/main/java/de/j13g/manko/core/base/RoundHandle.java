@@ -6,8 +6,7 @@ import de.j13g.manko.core.exceptions.*;
 /**
  * A handle for a tournament round. Used for managing the round of a tournament.
  * Implements methods for both a round and any class that handles a round.
- * All operations actively change the state of a tournament.
- * Implements the CUD (Create Update Delete) in CRUD.
+ * All operations actively change the state of the round.
  * @param <E> The entrant type.
  */
 public interface RoundHandle<E> {
@@ -16,10 +15,9 @@ public interface RoundHandle<E> {
      * Adds an entrant to the round.
      * @param entrant The entrant to add.
      * @return If that entrant was not already in the round.
-     * @throws AlreadyStartedException When adding players is not possible after the tournament started.
+     * @throws InvalidEntrantException The entrant cannot be added to this round.
      */
-    boolean addEntrant(E entrant)
-            throws AlreadyStartedException;
+    boolean addEntrant(E entrant) throws InvalidEntrantException;
 
     /**
      * Removes the entrant from the round if possible.
