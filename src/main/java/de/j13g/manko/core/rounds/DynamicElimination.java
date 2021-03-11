@@ -1,12 +1,11 @@
 package de.j13g.manko.core.rounds;
 
 import de.j13g.manko.core.Pairing;
+import de.j13g.manko.core.PairingManager;
 import de.j13g.manko.core.ResultsManager;
 import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.base.EliminationRound;
 import de.j13g.manko.util.ShuffledSet;
-import de.j13g.manko.util.UniformPairLinkedBiSet;
-import de.j13g.manko.util.UniformPairUniqueBiSet;
 import de.j13g.manko.util.exceptions.EmptySetException;
 import de.j13g.manko.util.exceptions.NoSuchElementException;
 
@@ -21,8 +20,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     private final ResultsManager<E> results = new ResultsManager<>();
     private final ResultsManager<E> floatingResults = new ResultsManager<>();
 
-    private final UniformPairUniqueBiSet<E, Pairing<E>> activePairings = new UniformPairUniqueBiSet<>();
-    private final UniformPairLinkedBiSet<E, Pairing<E>> finishedPairings = new UniformPairLinkedBiSet<>();
+    private final PairingManager<E> pairings = new PairingManager<>();
 
     public DynamicElimination() {}
 
@@ -65,7 +63,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         if (!contains(winningEntrant))
             throw new NoSuchEntrantException();
 
-        Pairing<E> pairing = activePairings.findByElement(winningEntrant);
+        Pairing<E> pairing = pairings.findActiveByEntrant(winningEntrant);
         if (pairing == null)
             throw new MissingPairingException();
 
@@ -88,7 +86,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         if (!contains(winningEntrant))
             throw new NoSuchEntrantException();
 
-        if (!activePairings.contains(pairing))
+        if (!pairings.isActive(pairing))
             throw new NoSuchPairingException();
 
         results.advance(winningEntrant);
@@ -101,7 +99,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     public void declareTie(Pairing<E> pairing)
             throws NoSuchPairingException {
 
-        if (!activePairings.contains(pairing))
+        if (!pairings.isActive(pairing))
             throw new NoSuchPairingException();
 
         finishPairing(pairing);
@@ -111,9 +109,9 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     public boolean replayPairing(Pairing<E> pairing)
             throws NoSuchPairingException, MissingEntrantException, OrphanedPairingException {
 
-        if (activePairings.contains(pairing))
+        if (pairings.isActive(pairing))
             return false;
-        if (!finishedPairings.contains(pairing))
+        if (!pairings.isFinished(pairing))
             throw new NoSuchPairingException();
 
         E first = pairing.getFirst();
@@ -129,7 +127,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
         results.reset(first);
         results.reset(second);
-        finishedPairings.remove(pairing);
+        pairings.remove(pairing);
 
         pendingEntrants.remove(first);
         pendingEntrants.remove(second);
@@ -144,7 +142,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
             return false;
 
         if (isPaired(entrant)) {
-            Pairing<E> pairing = activePairings.removeByElement(entrant);
+            Pairing<E> pairing = pairings.removeActiveByEntrant(entrant);
             resetOtherUnsafe(pairing, entrant);
             pendingEntrants.add(entrant);
         }
@@ -157,7 +155,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
             floatingResults.reset(entrant);
         }
 
-        Set<Pairing<E>> entrantPairingSet = finishedPairings.findByElement(entrant);
+        Set<Pairing<E>> entrantPairingSet = pairings.findFinishedByEntrant(entrant);
 
         // Create a copy because removing elements from finishedPairings
         // in the loop below will modify the original set.
@@ -169,7 +167,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         for (Pairing<E> pairing : entrantPairings) {
             E other = getOtherUnsafe(pairing, entrant);
             if (!hasResult(other) && !floatingResults.contains(other))
-                finishedPairings.remove(pairing);
+                pairings.removeFinished(pairing);
         }
 
         return true;
@@ -181,9 +179,9 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
             pendingEntrants.remove(entrant);
         }
         else if (isPaired(entrant)) {
-            Pairing<E> pairing = activePairings.findByElement(entrant);
+            Pairing<E> pairing = pairings.findActiveByEntrant(entrant);
             resetOtherUnsafe(pairing, entrant);
-            activePairings.remove(pairing);
+            pairings.removeActive(pairing);
         }
         else if (isAdvanced(entrant) || isEliminated(entrant)) {
             boolean wasMoved = results.moveTo(floatingResults, entrant);
@@ -202,9 +200,9 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     public boolean isPairingOrphaned(Pairing<E> pairing)
             throws NoSuchPairingException {
 
-        if (activePairings.contains(pairing))
+        if (pairings.isActive(pairing))
             return false;
-        if (!finishedPairings.contains(pairing))
+        if (!pairings.isFinished(pairing))
             throw new NoSuchPairingException();
 
         E first = pairing.getFirst();
@@ -215,8 +213,8 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         if (isPaired(first) || isPaired(second))
             return true;
 
-        int nFinishedFirst = finishedPairings.findByElement(first).size();
-        int nFinishedSecond = finishedPairings.findByElement(second).size();
+        int nFinishedFirst = pairings.findFinishedByEntrant(first).size();
+        int nFinishedSecond = pairings.findFinishedByEntrant(second).size();
 
         return nFinishedFirst > 1 && !isPending(first)
             || nFinishedSecond > 1 && !isPending(second);
@@ -246,7 +244,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     }
 
     public boolean isPaired(E entrant) {
-        return activePairings.findByElement(entrant) != null;
+        return pairings.hasActiveEntrant(entrant);
     }
 
     @Override
@@ -265,10 +263,10 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
     public boolean isFinished() {
         // Assert either not finished or proper entrant distribution.
-        assert !(pendingEntrants.isEmpty() && activePairings.isEmpty())
+        assert !(pendingEntrants.isEmpty() && !pairings.hasActive())
             || entrants.size() == results.getAdvanced().size() + results.getEliminated().size();
 
-        return pendingEntrants.isEmpty() && activePairings.isEmpty();
+        return pendingEntrants.isEmpty() && !pairings.hasActive();
     }
 
     public Set<E> getPendingEntrants() {
@@ -276,11 +274,11 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     }
 
     public Set<Pairing<E>> getActivePairings() {
-        return activePairings.elements();
+        return pairings.getActive();
     }
 
     public Set<Pairing<E>> getFinishedPairings() {
-        return finishedPairings.elements();
+        return pairings.getFinished();
     }
 
     @Override
@@ -304,25 +302,27 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
         Pairing<E> pairing = new Pairing<>(first, second);
 
-        assert !activePairings.contains(pairing);
-        assert !finishedPairings.contains(pairing);
+        assert !pairings.contains(pairing);
         assert !isPending(first) && !isPending(second);
         assert !hasResult(first) && !hasResult(second);
 
-        activePairings.add(pairing);
+        pairings.add(pairing);
         return pairing;
     }
 
     private void finishPairing(Pairing<E> pairing) {
-        assert activePairings.contains(pairing);
+        assert pairings.isActive(pairing);
 
-        finishedPairings.add(pairing);
-        activePairings.remove(pairing);
+        try {
+            pairings.finish(pairing);
+        } catch (NoSuchPairingException e) {
+            throw new RuntimeException(e);
+        }
 
         // Check that entrants don't end up where they shouldn't.
-        assert entrants.size() == 2 * activePairings.size() +
-                finishedPairings.getPairElementSet().size() + pendingEntrants.size();
-        assert entrants.size() == 2 * activePairings.size() +
+        assert entrants.size() == pairings.getActiveEntrants().size() +
+                pairings.getFinishedEntrants().size() + pendingEntrants.size();
+        assert entrants.size() == pairings.getActiveEntrants().size() +
                 results.getAdvanced().size() + results.getEliminated().size() + pendingEntrants.size();
     }
 
