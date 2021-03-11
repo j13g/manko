@@ -13,7 +13,7 @@ import de.j13g.manko.util.exceptions.NoSuchElementException;
 import java.io.Serializable;
 import java.util.*;
 
-public class DynamicRound<E extends Serializable> implements EliminationRound<E>, Serializable {
+public class DynamicElimination<E extends Serializable> implements EliminationRound<E>, Serializable {
 
     private final HashSet<E> entrants = new HashSet<>();
     private final ShuffledSet<E> pendingEntrants = new ShuffledSet<>();
@@ -24,9 +24,9 @@ public class DynamicRound<E extends Serializable> implements EliminationRound<E>
     private final UniformPairUniqueBiSet<E, Pairing<E>> activePairings = new UniformPairUniqueBiSet<>();
     private final UniformPairLinkedBiSet<E, Pairing<E>> finishedPairings = new UniformPairLinkedBiSet<>();
 
-    public DynamicRound() {}
+    public DynamicElimination() {}
 
-    public DynamicRound(Set<E> entrants) {
+    public DynamicElimination(Collection<E> entrants) {
         entrants.forEach(this::addEntrant);
     }
 

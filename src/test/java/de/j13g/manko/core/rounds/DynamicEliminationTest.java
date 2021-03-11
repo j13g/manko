@@ -12,7 +12,7 @@ import java.util.*;
 import static de.j13g.manko.Helper.assertSuppliesAll;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DynamicRoundTest {
+public class DynamicEliminationTest {
 
     private final Random random = new Random(0);
 
@@ -30,28 +30,28 @@ public class DynamicRoundTest {
     private final TestEntrant winner = first;
     private final TestEntrant loser = second;
 
-    private DynamicRound<TestEntrant> emptyRound;
-    private DynamicRound<TestEntrant> oneEntrantRound;
-    private DynamicRound<TestEntrant> twoEntrantRound;
-    private DynamicRound<TestEntrant> multiEntrantRound;
+    private DynamicElimination<TestEntrant> emptyRound;
+    private DynamicElimination<TestEntrant> oneEntrantRound;
+    private DynamicElimination<TestEntrant> twoEntrantRound;
+    private DynamicElimination<TestEntrant> multiEntrantRound;
 
-    private DynamicRound<TestEntrant> singlePairRound;
-    private DynamicRound<TestEntrant> singlePairFinishedRound;
+    private DynamicElimination<TestEntrant> singlePairRound;
+    private DynamicElimination<TestEntrant> singlePairFinishedRound;
 
     @BeforeEach
     void init() {
-        emptyRound = new DynamicRound<>();
+        emptyRound = new DynamicElimination<>();
 
-        oneEntrantRound = new DynamicRound<>();
+        oneEntrantRound = new DynamicElimination<>();
         oneEntrantRound.addEntrant(first);
 
-        twoEntrantRound = new DynamicRound<>();
+        twoEntrantRound = new DynamicElimination<>();
         twoEntrantRound.addEntrant(first);
         twoEntrantRound.addEntrant(second);
 
         multiEntrantRound = createMultiEntrantRound();
 
-        singlePairRound = new DynamicRound<>();
+        singlePairRound = new DynamicElimination<>();
         singlePairRound.addEntrant(first);
         singlePairRound.addEntrant(second);
         assertDoesNotThrow(() -> singlePairRound.nextPairing());
@@ -63,15 +63,15 @@ public class DynamicRoundTest {
         return new TestEntrant(random.nextInt());
     }
 
-    private DynamicRound<TestEntrant> createMultiEntrantRound() {
-        DynamicRound<TestEntrant> round = new DynamicRound<>();
+    private DynamicElimination<TestEntrant> createMultiEntrantRound() {
+        DynamicElimination<TestEntrant> round = new DynamicElimination<>();
         for (TestEntrant entrant : entrants)
             round.addEntrant(entrant);
         return round;
     }
 
-    private DynamicRound<TestEntrant> createSinglePairFinishedRound() {
-        DynamicRound<TestEntrant> round = new DynamicRound<>();
+    private DynamicElimination<TestEntrant> createSinglePairFinishedRound() {
+        DynamicElimination<TestEntrant> round = new DynamicElimination<>();
         round.addEntrant(first);
         round.addEntrant(second);
         assertDoesNotThrow(round::nextPairing);
@@ -79,7 +79,7 @@ public class DynamicRoundTest {
         return round;
     }
 
-    private Pairing<TestEntrant> getFinishedPairing(DynamicRound<TestEntrant> round) {
+    private Pairing<TestEntrant> getFinishedPairing(DynamicElimination<TestEntrant> round) {
         assertEquals(1, round.getFinishedPairings().size());
         return round.getFinishedPairings().iterator().next();
     }
@@ -361,7 +361,7 @@ public class DynamicRoundTest {
     @Test
     void threeEntrantRound_resetLoserThenPairAgainstOther_hasTwoFinishedPairings() throws Exception {
         twoEntrantRound.addEntrant(third);
-        DynamicRound<TestEntrant> threeEntrantRound = twoEntrantRound;
+        DynamicElimination<TestEntrant> threeEntrantRound = twoEntrantRound;
 
         Pairing<TestEntrant> firstPairing = threeEntrantRound.nextPairing();
         TestEntrant firstWinner = firstPairing.getFirst();
@@ -450,7 +450,7 @@ public class DynamicRoundTest {
 
     @Test
     void singlePairFinishedRound_resetThenRemoveAdvanced_identicalToRemoveThenResetAdvanced() {
-        DynamicRound<TestEntrant> otherRound = createSinglePairFinishedRound();
+        DynamicElimination<TestEntrant> otherRound = createSinglePairFinishedRound();
 
         singlePairFinishedRound.resetEntrant(winner);
         singlePairFinishedRound.removeEntrant(winner);
@@ -474,7 +474,7 @@ public class DynamicRoundTest {
     void multiEntrantRound_nextPairing_isRandom() {
         assertSuppliesAll(entrants, () ->
             assertDoesNotThrow(() -> {
-                DynamicRound<TestEntrant> round = createMultiEntrantRound();
+                DynamicElimination<TestEntrant> round = createMultiEntrantRound();
                 Pairing<TestEntrant> pairing = round.nextPairing();
                 return pairing.getFirst();
             })
