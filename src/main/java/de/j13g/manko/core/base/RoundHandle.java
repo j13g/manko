@@ -41,10 +41,10 @@ public interface RoundHandle<E> {
      * @return The pairing.
      * @throws NoEntrantsException There are no entrants in this round.
      * @throws NoOpponentException The only remaining entrant does not have an opponent.
-     * @throws RoundFinishedException The round is already finished.
+     * @throws NoMorePairingsException The round is already finished.
      */
     Pairing<E> nextPairing()
-            throws NoEntrantsException, NoOpponentException, RoundFinishedException;
+            throws NoEntrantsException, NoOpponentException, NoMorePairingsException;
 
     /**
      * Reverts the results of a pairing, so that it can be carried out again.
