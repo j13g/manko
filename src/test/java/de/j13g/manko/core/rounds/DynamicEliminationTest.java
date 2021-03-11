@@ -12,23 +12,7 @@ import java.util.*;
 import static de.j13g.manko.Helper.assertSuppliesAll;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DynamicEliminationTest {
-
-    private final Random random = new Random(0);
-
-    private final TestEntrant first = createEntrant();
-    private final TestEntrant second = createEntrant();
-    private final TestEntrant third = createEntrant();
-    private final TestEntrant invalidEntrant = createEntrant();
-
-    private final List<TestEntrant> entrants = Arrays.asList(
-        first, second, third, createEntrant(),
-        createEntrant(), createEntrant(), createEntrant(),
-        createEntrant(), createEntrant(), createEntrant()
-    );
-
-    private final TestEntrant winner = first;
-    private final TestEntrant loser = second;
+public class DynamicEliminationTest extends BaseRoundTest {
 
     private DynamicElimination<TestEntrant> emptyRound;
     private DynamicElimination<TestEntrant> oneEntrantRound;
@@ -57,10 +41,6 @@ public class DynamicEliminationTest {
         assertDoesNotThrow(() -> singlePairRound.nextPairing());
 
         singlePairFinishedRound = createSinglePairFinishedRound();
-    }
-
-    private TestEntrant createEntrant() {
-        return new TestEntrant(random.nextInt());
     }
 
     private DynamicElimination<TestEntrant> createMultiEntrantRound() {
@@ -462,13 +442,6 @@ public class DynamicEliminationTest {
     }
 
     // Miscellaneous
-
-    @Test
-    void testEntrants_uniqueIds() {
-        ArrayList<TestEntrant> allEntrants = new ArrayList<>(entrants);
-        allEntrants.add(invalidEntrant);
-        assertEquals(allEntrants.size(), new HashSet<>(allEntrants).size());
-    }
 
     @Test
     void multiEntrantRound_nextPairing_isRandom() {
