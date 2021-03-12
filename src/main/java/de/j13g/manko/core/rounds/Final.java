@@ -3,8 +3,8 @@ package de.j13g.manko.core.rounds;
 import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.Placement;
 import de.j13g.manko.core.base.FinalRound;
+import de.j13g.manko.core.base.RankingRound;
 import de.j13g.manko.core.managers.PairingManager;
-import de.j13g.manko.core.base.BaseRankingRound;
 import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.managers.PlacementManager;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
-public class Final<E extends Serializable> extends BaseRankingRound<E> implements FinalRound<E> {
+public class Final<E extends Serializable> implements RankingRound<E>, FinalRound<E> {
 
     private final Pairing<E> firstPlacePairing;
     private final Pairing<E> thirdPlacePairing;
@@ -105,6 +105,11 @@ public class Final<E extends Serializable> extends BaseRankingRound<E> implement
     }
 
     @Override
+    public boolean resetEntrant(E entrant) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Pairing<E> nextPairing() throws NoMorePairingsException {
         if (pairingOrder.isEmpty())
             throw new NoMorePairingsException();
@@ -169,6 +174,11 @@ public class Final<E extends Serializable> extends BaseRankingRound<E> implement
 
         declareWinner(winningEntrant, pairing);
         return pairing;
+    }
+
+    @Override
+    public void declareTie(Pairing<E> pairing) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
