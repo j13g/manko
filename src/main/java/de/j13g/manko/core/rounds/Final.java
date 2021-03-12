@@ -205,12 +205,12 @@ public class Final<E> extends BaseRankingRound<E> implements FinalRound<E> {
         return pairingOrder.isEmpty() && pairings.getActive().isEmpty();
     }
 
-    @Override
+//    @Override
     public List<Pairing<E>> getUpcomingPairings() {
         return Collections.unmodifiableList(pairingOrder);
     }
 
-    @Override
+//    @Override
     public Collection<Pairing<E>> getOutstandingPairings() {
         return Collections.emptyList();
     }
