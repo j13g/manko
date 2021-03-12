@@ -101,6 +101,9 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         if (!pairings.isActive(pairing))
             throw new NoSuchPairingException();
 
+        results.eliminate(pairing.getFirst());
+        results.eliminate(pairing.getSecond());
+
         finishPairing(pairing);
     }
 

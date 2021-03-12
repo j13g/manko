@@ -209,6 +209,15 @@ public class DynamicEliminationTest extends BaseRoundTest {
         }
     }
 
+    // declareTie
+
+    @Test
+    void singlePairRound_declareTie_bothEntrantsEliminated() {
+        singlePairRound.declareTie(singlePairRound.getActivePairings().iterator().next());
+        assertTrue(singlePairRound.isEntrantEliminated(first));
+        assertTrue(singlePairRound.isEntrantEliminated(second));
+    }
+
     // replayPairing()
 
     @Test
