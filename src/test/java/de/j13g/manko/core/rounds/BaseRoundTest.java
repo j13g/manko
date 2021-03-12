@@ -1,13 +1,10 @@
 package de.j13g.manko.core.rounds;
 
 import de.j13g.manko.core.TestEntrant;
-import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-public class BaseRoundTest {
+public abstract class BaseRoundTest {
 
     protected final Random random = new Random(0);
     protected final HashSet<TestEntrant> testEntrants = new HashSet<>();
@@ -17,12 +14,6 @@ public class BaseRoundTest {
     protected final TestEntrant third = createEntrant();
 
     protected final TestEntrant invalidEntrant = createEntrant();
-
-    protected final List<TestEntrant> entrants = Arrays.asList(
-            first, second, third, createEntrant(),
-            createEntrant(), createEntrant(), createEntrant(),
-            createEntrant(), createEntrant(), createEntrant()
-    );
 
     protected TestEntrant createEntrant() {
         TestEntrant entrant = new TestEntrant(random.nextInt());

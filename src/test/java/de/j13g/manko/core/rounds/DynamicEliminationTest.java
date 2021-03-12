@@ -14,8 +14,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class DynamicEliminationTest extends BaseRoundTest {
 
-    protected final TestEntrant winner = first;
-    protected final TestEntrant loser = second;
+    private final List<TestEntrant> entrants = Arrays.asList(
+            first, second, third, createEntrant(),
+            createEntrant(), createEntrant(), createEntrant(),
+            createEntrant(), createEntrant(), createEntrant()
+    );
+
+    private final TestEntrant winner = first;
+    private final TestEntrant loser = second;
 
     private DynamicElimination<TestEntrant> emptyRound;
     private DynamicElimination<TestEntrant> oneEntrantRound;
