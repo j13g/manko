@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DynamicEliminationTest extends BaseRoundTest {
 
     private final List<TestEntrant> entrants = Arrays.asList(
-            first, second, third, createEntrant(),
+            first, second, third, fourth,
             createEntrant(), createEntrant(), createEntrant(),
             createEntrant(), createEntrant(), createEntrant()
     );

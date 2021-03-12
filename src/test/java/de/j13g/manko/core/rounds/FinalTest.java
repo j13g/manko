@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FinalTest extends BaseRoundTest {
 
-    private final TestEntrant fourth = createEntrant();
-
     private final List<TestEntrant> entrants = Arrays.asList(
             first, second, third, fourth
     );

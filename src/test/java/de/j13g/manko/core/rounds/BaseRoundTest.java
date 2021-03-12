@@ -12,6 +12,7 @@ public abstract class BaseRoundTest {
     protected final TestEntrant first = createEntrant();
     protected final TestEntrant second = createEntrant();
     protected final TestEntrant third = createEntrant();
+    protected final TestEntrant fourth = createEntrant();
 
     protected final TestEntrant invalidEntrant = createEntrant();
 
