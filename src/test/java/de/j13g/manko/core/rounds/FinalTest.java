@@ -19,7 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FinalTest extends BaseRoundTest {
+class FinalTest extends RoundTest {
 
     private final List<TestEntrant> entrants = Arrays.asList(
             first, second, third, fourth

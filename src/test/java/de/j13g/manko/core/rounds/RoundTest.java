@@ -4,7 +4,7 @@ import de.j13g.manko.core.TestEntrant;
 
 import java.util.*;
 
-public abstract class BaseRoundTest {
+public abstract class RoundTest {
 
     protected final Random random = new Random(0);
     protected final HashSet<TestEntrant> testEntrants = new HashSet<>();

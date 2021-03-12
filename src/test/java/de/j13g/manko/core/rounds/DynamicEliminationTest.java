@@ -12,7 +12,7 @@ import java.util.*;
 import static de.j13g.manko.Helper.assertSuppliesAll;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DynamicEliminationTest extends BaseRoundTest {
+public class DynamicEliminationTest extends RoundTest {
 
     private final List<TestEntrant> entrants = Arrays.asList(
             first, second, third, fourth,
