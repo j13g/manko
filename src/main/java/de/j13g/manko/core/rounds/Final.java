@@ -9,9 +9,10 @@ import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.managers.PlacementManager;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Final<E> extends BaseRankingRound<E> implements FinalRound<E> {
+public class Final<E extends Serializable> extends BaseRankingRound<E> implements FinalRound<E> {
 
     private final Pairing<E> firstPlacePairing;
     private final Pairing<E> thirdPlacePairing;
