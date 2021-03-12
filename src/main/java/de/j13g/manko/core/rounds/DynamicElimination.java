@@ -30,7 +30,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
 
     @Override
     public boolean addEntrant(E entrant) {
-        if (entrants.contains(entrant))
+        if (hasEntrant(entrant))
             return false;
 
         if (floatingResults.contains(entrant)) {
@@ -153,7 +153,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
             pendingEntrants.add(entrant);
         }
         else if (floatingResults.isAdvanced(entrant) || floatingResults.isEliminated(entrant)) {
-            assert !entrants.contains(entrant);
+            assert !hasEntrant(entrant);
             floatingResults.reset(entrant);
         }
 

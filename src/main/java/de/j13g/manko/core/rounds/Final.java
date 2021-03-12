@@ -50,7 +50,7 @@ public class Final<E> extends BaseRankingRound<E> implements FinalRound<E> {
 
     @Override
     public boolean addEntrant(E entrant) throws InvalidEntrantException {
-        if (entrants.contains(entrant))
+        if (hasEntrant(entrant))
             return false;
         if (!firstPlacePairing.contains(entrant) && !thirdPlacePairing.contains(entrant))
             throw new InvalidEntrantException();
@@ -78,7 +78,7 @@ public class Final<E> extends BaseRankingRound<E> implements FinalRound<E> {
 
     @Override
     public boolean removeEntrant(E entrant) {
-        if (!entrants.contains(entrant))
+        if (!hasEntrant(entrant))
             return false;
 
         Pairing<E> pairing = getPairingForEntrant(entrant);
