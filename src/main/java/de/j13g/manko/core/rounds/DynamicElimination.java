@@ -33,12 +33,13 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         if (hasEntrant(entrant))
             return false;
 
+        entrants.add(entrant);
+
         if (floatingResults.contains(entrant)) {
             floatingResults.moveTo(results, entrant);
             return true;
         }
 
-        entrants.add(entrant);
         pendingEntrants.add(entrant);
         return true;
     }

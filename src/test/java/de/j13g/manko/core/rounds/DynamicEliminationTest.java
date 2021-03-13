@@ -78,11 +78,13 @@ public class DynamicEliminationTest extends RoundTest {
     @Test
     void emptyRound_addEntrant_returnsTrue() {
         assertTrue(emptyRound.addEntrant(first));
+        assertTrue(emptyRound.hasEntrant(first));
     }
 
     @Test
     void oneEntrantRound_addEntrantAgain_returnsFalse() {
         assertFalse(oneEntrantRound.addEntrant(first));
+        assertTrue(oneEntrantRound.hasEntrant(first));
     }
 
     @Test
