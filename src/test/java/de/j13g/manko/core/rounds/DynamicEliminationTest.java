@@ -424,6 +424,19 @@ public class DynamicEliminationTest extends RoundTest {
         assertTrue(singlePairFinishedRound.getPendingEntrants().isEmpty());
     }
 
+    // isPairingOrphaned
+
+    @Test
+    void singlePairRound_finishTwoPairingsWithOverlappingEntrant_lastPairingOfEntrantIsNotOrphaned() throws Exception {
+        Pairing<TestEntrant> firstPairing = singlePairRound.declareWinner(winner);
+        singlePairRound.resetEntrant(loser);
+        singlePairRound.addEntrant(third);
+        Pairing<TestEntrant> secondPairing = singlePairRound.nextPairing();
+        singlePairRound.declareWinner(loser);
+        assertTrue(singlePairRound.isPairingOrphaned(firstPairing));
+        assertFalse(singlePairRound.isPairingOrphaned(secondPairing));
+    }
+
     // isFinished()
 
     @Test

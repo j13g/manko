@@ -279,16 +279,8 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         E first = pairing.getFirst();
         E second = pairing.getSecond();
 
-        // They're not in the same pairing,
-        // but one of them is in another pairing.
-        if (isEntrantPaired(first) || isEntrantPaired(second))
-            return true;
-
-        int nFinishedFirst = pairings.findFinishedByEntrant(first).size();
-        int nFinishedSecond = pairings.findFinishedByEntrant(second).size();
-
-        return nFinishedFirst > 1 && !isEntrantPending(first)
-                || nFinishedSecond > 1 && !isEntrantPending(second);
+        return !pairing.equals(pairings.getLastPairingOfEntrant(first))
+            || !pairing.equals(pairings.getLastPairingOfEntrant(second));
     }
 
     /**
