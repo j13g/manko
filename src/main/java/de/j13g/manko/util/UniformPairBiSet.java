@@ -54,9 +54,10 @@ public class UniformPairBiSet<E, P extends UniformPair<E>>
         boolean secondRemoved = pairsOfSecond.remove(pair);
         assert firstRemoved && secondRemoved;
 
-        // In case the set becomes empty after
-        // removal of the pair it is kept anyway.
-        // This just means that later no new set has to be created.
+        // We have to remove empty keys because
+        // getPairElementSet() relies on their correctness.
+        if (pairsOfFirst.isEmpty()) index.remove(first);
+        if (pairsOfSecond.isEmpty()) index.remove(second);
 
         return true;
     }
