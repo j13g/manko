@@ -1,5 +1,6 @@
 package de.j13g.manko.core.rounds;
 
+import de.j13g.manko.RoundTest;
 import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.Placement;
 import de.j13g.manko.core.TestEntrant;

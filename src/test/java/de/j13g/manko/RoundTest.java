@@ -1,4 +1,4 @@
-package de.j13g.manko.core.rounds;
+package de.j13g.manko;
 
 import de.j13g.manko.core.TestEntrant;
 
