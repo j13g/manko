@@ -19,7 +19,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "io.github.vonas.manko.Manko"
+      "de.j13g.manko.Manko"
     ]
   },
   "mixins": [
