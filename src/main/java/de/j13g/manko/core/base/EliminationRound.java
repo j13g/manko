@@ -4,6 +4,7 @@ import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.exceptions.NoSuchPairingException;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 public interface EliminationRound<E> extends Round<E> {
 
@@ -13,6 +14,14 @@ public interface EliminationRound<E> extends Round<E> {
      * @return Entrants that have advanced to the next round.
      */
     Set<E> getAdvancedEntrants();
+
+    /**
+     * Returns all entrants that have state associated with them.
+     * That can either be active entrants or entrants that were removed
+     * previously but still have a finished pairing associated with them.
+     * @return An iterator over all entrants with state information.
+     */
+    Stream<E> getEntrantsWithState();
 
     /**
      * @return Entrants that were eliminated.

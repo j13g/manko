@@ -5,22 +5,24 @@ import de.j13g.manko.core.managers.PairingManager;
 import de.j13g.manko.core.managers.ResultManager;
 import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.base.EliminationRound;
+import de.j13g.manko.core.managers.base.Pairings;
 import de.j13g.manko.util.ShuffledSet;
 import de.j13g.manko.util.exceptions.EmptySetException;
 import de.j13g.manko.util.exceptions.NoSuchElementException;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Stream;
 
-public class DynamicElimination<E extends Serializable> implements EliminationRound<E>, Serializable {
+public class DynamicElimination<E> implements EliminationRound<E>, Serializable {
 
-    private final HashSet<E> entrants = new HashSet<>();
-    private final ShuffledSet<E> pendingEntrants = new ShuffledSet<>();
+    protected final HashSet<E> entrants = new HashSet<>();
+    protected final ShuffledSet<E> pendingEntrants = new ShuffledSet<>();
 
-    private final ResultManager<E> results = new ResultManager<>();
-    private final ResultManager<E> floatingResults = new ResultManager<>();
+    protected final ResultManager<E> results = new ResultManager<>();
+    protected final ResultManager<E> floatingResults = new ResultManager<>();
 
-    private final PairingManager<E> pairings = new PairingManager<>();
+    protected final PairingManager<E> pairings = new PairingManager<>();
 
     public DynamicElimination() {}
 
@@ -188,9 +190,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         }
         else if (isEntrantAdvanced(entrant) || isEntrantEliminated(entrant)) {
             boolean wasMoved = results.moveTo(floatingResults, entrant);
-            // NOTE: Separate variable required so that
-            // the assert does not have side effects.
-            assert wasMoved;
+            assert wasMoved; // No side effects in assert allowed.
         }
         else if (floatingResults.contains(entrant)) {
             return false; // Already removed.
@@ -205,6 +205,16 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     }
 
     @Override
+    public Pairings<E> getPairings() {
+        return pairings;
+    }
+
+    @Override
+    public Set<E> getPairedEntrants() {
+        return pairings.getActiveEntrants();
+    }
+
+    @Override
     public Set<Pairing<E>> getActivePairings() {
         return pairings.getActive();
     }
@@ -212,6 +222,11 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     @Override
     public Set<Pairing<E>> getFinishedPairings() {
         return pairings.getFinished();
+    }
+
+    @Override
+    public Pairing<E> getLastPairing(E entrant) {
+        return pairings.getLastPairingOfEntrant(entrant);
     }
 
     @Override
@@ -225,6 +240,14 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
     }
 
     @Override
+    public Stream<E> getEntrantsWithState() {
+        Stream<E> advanced = floatingResults.getAdvanced().stream();
+        Stream<E> eliminated = floatingResults.getEliminated().stream();
+        Stream<E> floating = Stream.concat(advanced, eliminated);
+        return Stream.concat(entrants.stream(), floating);
+    }
+
+    @Override
     public Set<E> getEliminatedEntrants() {
         return results.getEliminated();
     }
@@ -234,9 +257,22 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         return entrants.contains(entrant);
     }
 
+    // FIXME hasEntrantResult does not involve
+    //  floatingResults, but hasWon and hasLost do.
+
     @Override
     public boolean hasEntrantResult(E entrant) {
         return results.contains(entrant);
+    }
+
+    @Override
+    public boolean hasWon(E entrant) {
+        return results.isAdvanced(entrant) || floatingResults.isAdvanced(entrant);
+    }
+
+    @Override
+    public boolean hasLost(E entrant) {
+        return results.isEliminated(entrant) || floatingResults.isEliminated(entrant);
     }
 
     @Override
@@ -288,12 +324,7 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         return !pairing.equals(lastPairingFirst) || !pairing.equals(lastPairingSecond);
     }
 
-    /**
-     * Checks if the entrant participates in this round
-     * or has won or lost a pairing before and was not reset since then.
-     * @param entrant The entrant.
-     * @return If any state is associated to this entrant.
-     */
+    @Override
     public boolean hasStateAbout(E entrant) {
         return hasEntrant(entrant) || floatingResults.contains(entrant);
     }

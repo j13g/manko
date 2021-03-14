@@ -5,7 +5,13 @@ import de.j13g.manko.core.exceptions.*;
 /**
  * Manages rounds of a tournament.
  */
-public interface RoundManager<E> {
+public interface RoundManager<E> extends RoundHandle<E> {
+
+    /**
+     * Gets the currently active round of the tournament.
+     * @return The current round.
+     */
+    Round<E> getCurrentRound();
 
     /**
      * Advances to the next round.

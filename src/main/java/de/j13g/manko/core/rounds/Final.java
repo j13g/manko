@@ -7,12 +7,13 @@ import de.j13g.manko.core.base.RankingRound;
 import de.j13g.manko.core.managers.PairingManager;
 import de.j13g.manko.core.exceptions.*;
 import de.j13g.manko.core.managers.PlacementManager;
+import de.j13g.manko.core.managers.base.Pairings;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.*;
 
-public class Final<E extends Serializable> implements RankingRound<E>, FinalRound<E> {
+public class Final<E> implements RankingRound<E>, FinalRound<E>, Serializable {
 
     private final Pairing<E> firstPlacePairing;
     private final Pairing<E> thirdPlacePairing;
@@ -88,9 +89,9 @@ public class Final<E extends Serializable> implements RankingRound<E>, FinalRoun
             E otherEntrant = pairing.getOther(entrant);
 
             placements.setPlacement(entrant, Placement.NONE);
-            if (pairing == firstPlacePairing)
+            if (pairing.equals(firstPlacePairing))
                 placements.setPlacement(otherEntrant, Placement.FIRST);
-            else if (pairing == thirdPlacePairing)
+            else if (pairing.equals(thirdPlacePairing))
                 placements.setPlacement(otherEntrant, Placement.THIRD);
 
             pairings.remove(pairing);
@@ -105,6 +106,7 @@ public class Final<E extends Serializable> implements RankingRound<E>, FinalRoun
     }
 
     @Override
+    @UnsupportedOperation
     public boolean resetEntrant(E entrant) {
         throw new UnsupportedOperationException();
     }
@@ -181,9 +183,33 @@ public class Final<E extends Serializable> implements RankingRound<E>, FinalRoun
         throw new UnsupportedOperationException();
     }
 
+    public void setFirstPlacePairingFirst() {
+        if (pairingOrder.size() == 2) {
+            pairingOrder.set(0, firstPlacePairing);
+            pairingOrder.set(1, thirdPlacePairing);
+        }
+    }
+
+    public void setThirdPlacePairingFirst() {
+        if (pairingOrder.size() == 2) {
+            pairingOrder.set(0, thirdPlacePairing);
+            pairingOrder.set(1, firstPlacePairing);
+        }
+    }
+
     @Override
     public Set<E> getEntrants() {
         return Collections.unmodifiableSet(entrants);
+    }
+
+    @Override
+    public Pairings<E> getPairings() {
+        return pairings;
+    }
+
+    @Override
+    public Set<E> getPairedEntrants() {
+        return pairings.getActiveEntrants();
     }
 
     @Override
@@ -197,12 +223,34 @@ public class Final<E extends Serializable> implements RankingRound<E>, FinalRoun
     }
 
     @Override
+    public Pairing<E> getLastPairing(E entrant) {
+        return pairings.getLastPairingOfEntrant(entrant);
+    }
+
+    @Override
     public boolean hasEntrant(E entrant) {
         return entrants.contains(entrant);
     }
 
     @Override
     public boolean hasEntrantResult(E entrant) {
+        return placements.getPlacement(entrant) != Placement.TBD;
+    }
+
+    @Override
+    public boolean hasWon(E entrant) {
+        Placement placement = placements.getPlacement(entrant);
+        return placement == Placement.FIRST || placement == Placement.THIRD;
+    }
+
+    @Override
+    public boolean hasLost(E entrant) {
+        Placement placement = placements.getPlacement(entrant);
+        return placement == Placement.SECOND || placement == Placement.NONE;
+    }
+
+    @Override
+    public boolean hasStateAbout(E entrant) {
         return placements.getPlacement(entrant) != Placement.TBD;
     }
 

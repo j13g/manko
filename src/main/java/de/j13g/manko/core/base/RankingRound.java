@@ -1,10 +1,6 @@
 package de.j13g.manko.core.base;
 
-import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.Placement;
-
-import java.util.Collection;
-import java.util.List;
 
 public interface RankingRound<E> extends Round<E> {
 
