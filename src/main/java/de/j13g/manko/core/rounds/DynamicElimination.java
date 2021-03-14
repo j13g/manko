@@ -280,8 +280,12 @@ public class DynamicElimination<E extends Serializable> implements EliminationRo
         E first = pairing.getFirst();
         E second = pairing.getSecond();
 
-        return !pairing.equals(pairings.getLastPairingOfEntrant(first))
-            || !pairing.equals(pairings.getLastPairingOfEntrant(second));
+        Pairing<E> lastPairingFirst = pairings.getLastPairingOfEntrant(first);
+        Pairing<E> lastPairingSecond = pairings.getLastPairingOfEntrant(second);
+        if (!pairings.isActive(lastPairingFirst) && !pairings.isActive(lastPairingSecond))
+            return false;
+
+        return !pairing.equals(lastPairingFirst) || !pairing.equals(lastPairingSecond);
     }
 
     /**
