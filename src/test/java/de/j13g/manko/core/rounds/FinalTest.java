@@ -4,10 +4,7 @@ import de.j13g.manko.RoundTest;
 import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.Placement;
 import de.j13g.manko.core.TestEntrant;
-import de.j13g.manko.core.exceptions.NewEntrantsNotAllowedException;
-import de.j13g.manko.core.exceptions.NoMorePairingsException;
-import de.j13g.manko.core.exceptions.NoSuchEntrantException;
-import de.j13g.manko.core.exceptions.NoSuchPairingException;
+import de.j13g.manko.core.exceptions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -170,6 +167,12 @@ class FinalTest extends RoundTest {
     void finalAtFirstPlace_replayThirdPlace_everyEntrantIsPaired() {
         finalAtFirstPlace.replayPairing(thirdPlacePairing);
         entrants.forEach(e -> assertTrue(finalAtFirstPlace.isEntrantPaired(e)));
+    }
+
+    @Test
+    void finalAtFirstPlace_removeThirdPlaceAndReplay_throwsMissingEntrantException() {
+        finalAtFirstPlace.removeEntrant(third);
+        assertThrows(MissingEntrantException.class, () -> finalAtFirstPlace.replayPairing(thirdPlacePairing));
     }
 
     // declareWinner

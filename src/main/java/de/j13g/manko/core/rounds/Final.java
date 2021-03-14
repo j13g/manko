@@ -124,11 +124,13 @@ public class Final<E> implements RankingRound<E>, FinalRound<E>, Serializable {
     }
 
     @Override
-    public boolean replayPairing(Pairing<E> pairing) throws NoSuchPairingException {
+    public boolean replayPairing(Pairing<E> pairing) throws NoSuchPairingException, MissingEntrantException {
         if (pairings.isActive(pairing))
             return false;
         if (!pairings.isFinished(pairing))
             throw new NoSuchPairingException();
+        if (!hasEntrant(pairing.getFirst()) || !hasEntrant(pairing.getSecond()))
+            throw new MissingEntrantException();
 
         placements.resetPlacement(pairing.getFirst());
         placements.resetPlacement(pairing.getSecond());
