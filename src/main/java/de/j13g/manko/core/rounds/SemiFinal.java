@@ -20,9 +20,9 @@ public class SemiFinal<E extends Serializable> extends DynamicElimination<E> {
     }
 
     @Override
-    public boolean addEntrant(E entrant) throws InvalidEntrantException {
+    public boolean addEntrant(E entrant) throws NewEntrantsNotAllowedException {
         if (!originalEntrants.contains(entrant))
-            throw new InvalidEntrantException();
+            throw new NewEntrantsNotAllowedException();
 
         return super.addEntrant(entrant);
     }

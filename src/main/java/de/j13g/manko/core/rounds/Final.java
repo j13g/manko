@@ -50,11 +50,11 @@ public class Final<E extends Serializable> implements RankingRound<E>, FinalRoun
     }
 
     @Override
-    public boolean addEntrant(E entrant) throws InvalidEntrantException {
+    public boolean addEntrant(E entrant) throws NewEntrantsNotAllowedException {
         if (hasEntrant(entrant))
             return false;
         if (!firstPlacePairing.contains(entrant) && !thirdPlacePairing.contains(entrant))
-            throw new InvalidEntrantException();
+            throw new NewEntrantsNotAllowedException();
 
         Pairing<E> pairing = getPairingForEntrant(entrant);
 
