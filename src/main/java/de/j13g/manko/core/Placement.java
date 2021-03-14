@@ -1,6 +1,8 @@
 package de.j13g.manko.core;
 
-public enum Placement {
+import java.io.Serializable;
+
+public enum Placement implements Serializable {
 
     FIRST, // 1st place
     SECOND, // 2nd place

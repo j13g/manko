@@ -1,10 +1,11 @@
 package de.j13g.manko.core.managers;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ResultManager<E> {
+public class ResultManager<E> implements Serializable {
 
     private final HashSet<E> advanced = new HashSet<>();
     private final HashSet<E> eliminated = new HashSet<>();

@@ -2,10 +2,11 @@ package de.j13g.manko.core.managers;
 
 import de.j13g.manko.core.Placement;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 // TODO Extract common methods compared to ScoreManager.
-public class PlacementManager<E> {
+public class PlacementManager<E> implements Serializable {
 
     private static final Placement DEFAULT_PLACEMENT = Placement.TBD;
 

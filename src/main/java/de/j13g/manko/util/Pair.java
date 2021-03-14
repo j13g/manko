@@ -1,8 +1,9 @@
 package de.j13g.manko.util;
 
-import com.google.common.base.Objects;
+import java.io.Serializable;
+import java.util.Objects;
 
-public class Pair<A, B> {
+public class Pair<A, B> implements Serializable {
 
     protected final A first;
     protected final B second;
@@ -32,6 +33,6 @@ public class Pair<A, B> {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(first, second);
+        return Objects.hash(first, second);
     }
 }

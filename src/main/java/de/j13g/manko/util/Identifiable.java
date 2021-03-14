@@ -1,11 +1,13 @@
 package de.j13g.manko.util;
 
+import java.io.Serializable;
+
 /**
  * Instance of this class are identifiable by their ID, and only by their ID.
  * Two instance of this class are considered equal when their IDs compare equal.
  * @param <I> The type of the ID.
  */
-public abstract class Identifiable<I> {
+public abstract class Identifiable<I> implements Serializable {
 
     protected final I id;
 
