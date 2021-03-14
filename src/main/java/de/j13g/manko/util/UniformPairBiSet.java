@@ -28,8 +28,8 @@ public class UniformPairBiSet<E, P extends UniformPair<E>>
         E first = pair.getFirst();
         E second = pair.getSecond();
 
-        index.putIfAbsent(first, new HashSet<>());
-        index.putIfAbsent(second, new HashSet<>());
+        index.putIfAbsent(first, new LinkedHashSet<>());
+        index.putIfAbsent(second, new LinkedHashSet<>());
 
         index.get(first).add(pair);
         index.get(second).add(pair);
@@ -84,6 +84,20 @@ public class UniformPairBiSet<E, P extends UniformPair<E>>
         return pairings == null
             ? Collections.emptySet()
             : Collections.unmodifiableSet(pairings);
+    }
+
+    @Override
+    public P findLastByElement(E element) {
+        // This approach is generally inefficient, but consider this:
+        // How many pairs will there realistically be with the same elements?
+        // Pretty much in the 1-3 element area, especially in our case.
+        // Also, this method isn't called that frequently anyway, so It's Fine(TM).
+        LinkedHashSet<P> pairings = (LinkedHashSet<P>) index.get(element);
+        P last = null;
+        if (pairings != null)
+            for (P pairing : pairings)
+                last = pairing;
+        return last;
     }
 
     @Override

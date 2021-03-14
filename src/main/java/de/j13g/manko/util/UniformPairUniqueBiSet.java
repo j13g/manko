@@ -65,6 +65,11 @@ public class UniformPairUniqueBiSet<E, P extends UniformPair<E>>
     }
 
     @Override
+    public P findLastByElement(E element) {
+        return findByElement(element);
+    }
+
+    @Override
     public Set<E> getPairElementSet() {
         return index.keySet();
     }

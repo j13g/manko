@@ -26,11 +26,16 @@ public abstract class BaseUniformPairBiSet<E, P extends UniformPair<E>, C>
     public abstract C removeByElement(E element);
 
     /**
-     * Finds the pairs that contain this element.
      * @param element The element.
      * @return The pair(s) that contain(s) this element.
      */
     public abstract C findByElement(E element);
+
+    /**
+     * @param element The element.
+     * @return The last inserted pair that contains this element or null.
+     */
+    public abstract P findLastByElement(E element);
 
     /**
      * Returns a view set of all elements that are in pairs of this set.
