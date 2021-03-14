@@ -66,9 +66,9 @@ public class Final<E extends Serializable> implements RankingRound<E>, FinalRoun
         }
 
         if (!pairings.contains(pairing)) {
-            if (pairing == firstPlacePairing)
+            if (pairing.equals(firstPlacePairing))
                 pairingOrder.add(firstPlacePairing);
-            else if (pairing == thirdPlacePairing)
+            else if (pairing.equals(thirdPlacePairing))
                 pairingOrder.add(0, thirdPlacePairing);
         }
 
