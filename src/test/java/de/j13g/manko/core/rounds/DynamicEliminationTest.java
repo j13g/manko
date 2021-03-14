@@ -255,24 +255,22 @@ public class DynamicEliminationTest extends RoundTest {
     }
 
     @Test
-    void singlePairFinishedRound_resetFirstAndPairWithThirdThenReplayFirstPairing_throwsOrphanedPairingException() {
-        Pairing<TestEntrant> pairing = getFinishedPairing(singlePairFinishedRound);
+    void singlePairFinishedRound_resetFirstAndPairWithThirdThenReplayFirstPairing_throwsOrphanedPairingException() throws Exception {
+        Pairing<TestEntrant> firstPairing = getFinishedPairing(singlePairFinishedRound);
         singlePairFinishedRound.addEntrant(third);
         singlePairFinishedRound.resetEntrant(first);
 
         // The first entrant is already paired with the third entrant.
         assertDoesNotThrow(() -> singlePairFinishedRound.nextPairing());
-        assertThrows(OrphanedPairingException.class, () -> singlePairFinishedRound.replayPairing(pairing));
+        assertThrows(OrphanedPairingException.class, () -> singlePairFinishedRound.replayPairing(firstPairing));
 
         // The first entrant is now in another finished round.
         assertDoesNotThrow(() -> singlePairFinishedRound.declareWinner(first));
-        assertThrows(OrphanedPairingException.class, () -> singlePairFinishedRound.replayPairing(pairing));
+        assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(firstPairing));
 
         // Resetting that entrant and then replaying should work.
-        singlePairFinishedRound.resetEntrant(first);
-        assertDoesNotThrow(() -> singlePairFinishedRound.replayPairing(pairing));
-        assertTrue(singlePairFinishedRound.isEntrantPaired(pairing.getFirst()));
-        assertTrue(singlePairFinishedRound.isEntrantPaired(pairing.getSecond()));
+        assertTrue(singlePairFinishedRound.isEntrantPaired(firstPairing.getFirst()));
+        assertTrue(singlePairFinishedRound.isEntrantPaired(firstPairing.getSecond()));
     }
 
     @Test
@@ -430,13 +428,15 @@ public class DynamicEliminationTest extends RoundTest {
     // isPairingOrphaned
 
     @Test
-    void singlePairRound_finishTwoPairingsWithOverlappingEntrant_lastPairingOfEntrantIsNotOrphaned() throws Exception {
+    void singlePairRound_finishFirstAndPairAnother_firstPairingIsOrphaned() throws Exception {
         Pairing<TestEntrant> firstPairing = singlePairRound.declareWinner(winner);
         singlePairRound.resetEntrant(loser);
         singlePairRound.addEntrant(third);
         Pairing<TestEntrant> secondPairing = singlePairRound.nextPairing();
-        singlePairRound.declareWinner(loser);
         assertTrue(singlePairRound.isPairingOrphaned(firstPairing));
+        assertFalse(singlePairRound.isPairingOrphaned(secondPairing));
+        singlePairRound.declareWinner(loser);
+        assertFalse(singlePairRound.isPairingOrphaned(firstPairing));
         assertFalse(singlePairRound.isPairingOrphaned(secondPairing));
     }
 
