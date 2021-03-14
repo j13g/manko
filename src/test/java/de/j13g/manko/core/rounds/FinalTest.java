@@ -4,7 +4,7 @@ import de.j13g.manko.RoundTest;
 import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.Placement;
 import de.j13g.manko.core.TestEntrant;
-import de.j13g.manko.core.exceptions.InvalidEntrantException;
+import de.j13g.manko.core.exceptions.NewEntrantsNotAllowedException;
 import de.j13g.manko.core.exceptions.NoMorePairingsException;
 import de.j13g.manko.core.exceptions.NoSuchEntrantException;
 import de.j13g.manko.core.exceptions.NoSuchPairingException;
@@ -85,7 +85,7 @@ class FinalTest extends RoundTest {
 
     @Test
     void newFinal_addNonParticipatingEntrant_throwsInvalidEntrantException() {
-        assertThrows(InvalidEntrantException.class, () -> newFinal.addEntrant(invalidEntrant));
+        assertThrows(NewEntrantsNotAllowedException.class, () -> newFinal.addEntrant(invalidEntrant));
     }
 
     @Test

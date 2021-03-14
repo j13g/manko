@@ -15,9 +15,9 @@ public interface RoundHandle<E> {
      * Adds an entrant to the round.
      * @param entrant The entrant to add.
      * @return If that entrant was not already in the round.
-     * @throws InvalidEntrantException The entrant cannot be added to this round.
+     * @throws NewEntrantsNotAllowedException Adding a new entrant is not allowed.
      */
-    boolean addEntrant(E entrant) throws InvalidEntrantException;
+    boolean addEntrant(E entrant) throws NewEntrantsNotAllowedException;
 
     /**
      * Removes the entrant from the round if possible.

@@ -2,7 +2,7 @@ package de.j13g.manko.core.rounds;
 
 import de.j13g.manko.RoundTest;
 import de.j13g.manko.core.TestEntrant;
-import de.j13g.manko.core.exceptions.InvalidEntrantException;
+import de.j13g.manko.core.exceptions.NewEntrantsNotAllowedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ class SemiFinalTest extends RoundTest {
 
     @Test
     void newSemiFinal_addInvalidEntrant_throwsInvalidEntrantException() {
-        assertThrows(InvalidEntrantException.class, () -> newSemiFinal.addEntrant(invalidEntrant));
+        assertThrows(NewEntrantsNotAllowedException.class, () -> newSemiFinal.addEntrant(invalidEntrant));
     }
 
     @Test
