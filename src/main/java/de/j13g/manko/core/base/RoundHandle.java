@@ -42,7 +42,7 @@ public interface RoundHandle<E> {
      * @throws NoMorePairingsException The round is already finished.
      */
     Pairing<E> nextPairing()
-            throws NoEntrantsException, NoOpponentException, NoMorePairingsException;
+            throws NoEntrantsException, NoOpponentException, UnfinishedPairingsException, NoMorePairingsException;
 
     /**
      * Reverts the results of a pairing, so that it can be carried out again.
