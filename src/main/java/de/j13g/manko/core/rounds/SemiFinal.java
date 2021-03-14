@@ -1,13 +1,13 @@
 package de.j13g.manko.core.rounds;
 
-import de.j13g.manko.core.exceptions.InvalidEntrantException;
+import de.j13g.manko.core.exceptions.NewEntrantsNotAllowedException;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public class SemiFinal<E extends Serializable> extends DynamicElimination<E> {
+public class SemiFinal<E> extends DynamicElimination<E> implements Serializable {
+
+    private static final int ENTRANT_COUNT = 4;
 
     private final Set<E> originalEntrants;
 
@@ -16,7 +16,19 @@ public class SemiFinal<E extends Serializable> extends DynamicElimination<E> {
         super.addEntrant(second);
         super.addEntrant(third);
         super.addEntrant(fourth);
-        originalEntrants = Collections.unmodifiableSet(new HashSet<>(entrants));
+        originalEntrants = getFrozenEntrantsSet();
+    }
+
+    public SemiFinal(Collection<E> entrants) {
+        if (entrants.size() != ENTRANT_COUNT)
+            throw new IllegalArgumentException();
+
+        entrants.forEach(super::addEntrant);
+        originalEntrants = getFrozenEntrantsSet();
+    }
+
+    private Set<E> getFrozenEntrantsSet() {
+        return Collections.unmodifiableSet(new HashSet<>(entrants));
     }
 
     @Override
