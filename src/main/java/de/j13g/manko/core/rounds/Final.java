@@ -2,6 +2,7 @@ package de.j13g.manko.core.rounds;
 
 import de.j13g.manko.core.Pairing;
 import de.j13g.manko.core.Placement;
+import de.j13g.manko.core.annotations.UnsupportedOperation;
 import de.j13g.manko.core.base.FinalRound;
 import de.j13g.manko.core.base.RankingRound;
 import de.j13g.manko.core.managers.PairingManager;
@@ -179,6 +180,7 @@ public class Final<E> implements RankingRound<E>, FinalRound<E>, Serializable {
     }
 
     @Override
+    @UnsupportedOperation
     public void declareTie(Pairing<E> pairing) {
         throw new UnsupportedOperationException();
     }

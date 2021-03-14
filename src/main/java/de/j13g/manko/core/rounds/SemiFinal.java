@@ -1,5 +1,6 @@
 package de.j13g.manko.core.rounds;
 
+import de.j13g.manko.core.annotations.UnsupportedOperation;
 import de.j13g.manko.core.exceptions.NewEntrantsNotAllowedException;
 
 import java.io.Serializable;
@@ -40,6 +41,7 @@ public class SemiFinal<E> extends DynamicElimination<E> implements Serializable 
     }
 
     @Override
+    @UnsupportedOperation
     public boolean resetEntrant(E entrant) {
         throw new UnsupportedOperationException();
     }
