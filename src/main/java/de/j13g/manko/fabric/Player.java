@@ -8,43 +8,32 @@ import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.command.EntitySelector;
 
+import java.io.Serializable;
+import java.util.Locale;
 import java.util.UUID;
 
-public class Player extends Identifiable<UUID> {
+/**
+ * Represents a player in the game.
+ * Note that we are not using their UUID here because players need to
+ * also be instantiable when getting their UUID is impossible or impractical.
+ */
+public class Player extends Identifiable<String> implements Serializable {
 
-    private final UUID uuid;
     private final String name;
 
-    public Player(UUID uuid, String name) {
-        super(uuid);
-        this.uuid = uuid;
+    public Player(String name) {
+        super(name.toLowerCase(Locale.ROOT));
         this.name = name;
     }
 
     public static Player fromEntitySelector(CommandContext<FabricClientCommandSource> context,
-                                            EntitySelector entitySelector) throws MissingPlayerException {
+                                            EntitySelector entitySelector) {
 
-        String playerName = ((EntitySelectorAccessor) entitySelector).getPlayerName();
-        if (playerName == null)
-            throw new MissingPlayerException();
+        String name = ((EntitySelectorAccessor) entitySelector).getPlayerName();
+        if (name == null)
+            throw new RuntimeException("Player name is empty");
 
-        return fromPlayerName(context, playerName);
-    }
-
-    public static Player fromPlayerName(CommandContext<FabricClientCommandSource> context, String playerName)
-            throws MissingPlayerException {
-
-        for (AbstractClientPlayerEntity player : context.getSource().getWorld().getPlayers()) {
-            // TODO: Is getEntityName() the right method here?
-            if (player.getEntityName().equals(playerName))
-                return new Player(player.getUuid(), playerName);
-        }
-
-        throw new MissingPlayerException();
-    }
-
-    public UUID getUuid() {
-        return uuid;
+        return new Player(name);
     }
 
     public String getName() {
