@@ -12,14 +12,10 @@ public class UniformPair<E> extends Pair<E, E> {
         if (!contains(element))
             throw new NoSuchElementException();
 
-        return element == first ? second : first;
+        return element.equals(first) ? second : first;
     }
 
     public boolean contains(E element) {
-        return element == first || element == second;
-    }
-
-    public boolean containsEqual(E element) {
         return element.equals(first) || element.equals(second);
     }
 }
