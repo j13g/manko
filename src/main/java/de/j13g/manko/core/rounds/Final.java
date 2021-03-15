@@ -114,10 +114,10 @@ public class Final<E> implements RankingRound<E>, FinalRound<E>, Serializable {
 
     @Override
     public Pairing<E> nextPairing() throws UnfinishedPairingsException, NoMorePairingsException {
-        if (pairings.hasActive())
-            throw new UnfinishedPairingsException();
         if (pairingOrder.isEmpty())
             throw new NoMorePairingsException();
+        if (pairings.hasActive())
+            throw new UnfinishedPairingsException();
 
         Pairing<E> pairing = pairingOrder.remove(0);
         pairings.add(pairing);
