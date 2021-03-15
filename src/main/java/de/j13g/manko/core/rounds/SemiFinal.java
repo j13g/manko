@@ -45,4 +45,9 @@ public class SemiFinal<E> extends DynamicElimination<E> implements Serializable 
     public boolean resetEntrant(E entrant) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean hasStateAbout(E entrant) {
+        return originalEntrants.contains(entrant);
+    }
 }
