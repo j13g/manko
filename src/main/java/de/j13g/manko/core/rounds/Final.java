@@ -257,7 +257,7 @@ public class Final<E> implements RankingRound<E>, FinalRound<E>, Serializable {
 
     @Override
     public boolean hasStateAbout(E entrant) {
-        return placements.getPlacement(entrant) != Placement.TBD;
+        return firstPlacePairing.contains(entrant) || thirdPlacePairing.contains(entrant);
     }
 
     @Override
