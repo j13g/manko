@@ -32,7 +32,7 @@ class FinalTest extends RoundTest {
     private Final<TestEntrant> finishedFinal;
 
     @BeforeEach
-    void init() {
+    void init() throws UnfinishedPairingsException {
         newFinal = createFinal();
 
         finalAtThirdPlace = createFinal();
@@ -141,13 +141,13 @@ class FinalTest extends RoundTest {
     // nextPairing
 
     @Test
-    void newFinal_nextPairing_returnsThirdPlacePairing() {
+    void newFinal_nextPairing_returnsThirdPlacePairing() throws UnfinishedPairingsException {
         Pairing<TestEntrant> pairing = newFinal.nextPairing();
         assertEquals(thirdPlacePairing, pairing);
     }
 
     @Test
-    void newFinal_nextPairing_upcomingPairingsContainsOnlyFirstPlacePairing() {
+    void newFinal_nextPairing_upcomingPairingsContainsOnlyFirstPlacePairing() throws UnfinishedPairingsException {
         newFinal.nextPairing();
         List<Pairing<TestEntrant>> upcomingPairings = newFinal.getUpcomingPairings();
         assertEquals(1, upcomingPairings.size());
@@ -155,10 +155,9 @@ class FinalTest extends RoundTest {
     }
 
     @Test
-    void newFinal_nextPairingThreeTimes_throwsNoMorePairingsException() {
+    void newFinal_nextPairingTwice_throwsUnfinishedPairingsException() throws UnfinishedPairingsException {
         newFinal.nextPairing();
-        newFinal.nextPairing();
-        assertThrows(NoMorePairingsException.class, newFinal::nextPairing);
+        assertThrows(UnfinishedPairingsException.class, newFinal::nextPairing);
     }
 
     // replayPairing
