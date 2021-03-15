@@ -1,0 +1,342 @@
+
+/next
+
+
+== Case 1 ==
+
+# Final: Round Robin
+
+# Round: DynamicRound
+# Players: A, B, C
+
+! Remove restriction of createPairing(E1, E2) <=> E1 and E2 in exactly one existing pairing
+! Instead add a warning when one of them is already paired
+
+# Special command to pair everyone with everyone:
+
+/rr /roundrobin
+
+# => /pair A B
+# => /pair A C
+# => /pair B C
+
+
+== Case 2 ==
+
+# Final: Half Final and Final
+
+# Round: DynamicRound
+# Players: A, B, C, D
+
+/pair  # => A C
+/pair  # => B D
+
+/win A  # => A: 1 point
+/win B  # => B: 1 point
+
+# C: 0 points
+# D: 0 points
+
+
+# The following command pairs people with equal points
+# This is basically the equivalent of /roundrobin above
+
+/rank
+
+# Participants are ranked automatically with other with the same score
+# This happens so long, until no two players have the same score
+# Executing /rank basically switches to ranked mode
+
+# In normal mode only participants with 0 points are paired
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Example with 5 players
+
+# A B C D E
+
+A B - A
+A C - A
+A D - A
+A E - E
+B C - B
+B D - B
+B E - B
+C D - C
+C E - C
+D E - D
+
+A: 3
+B: 3
+C: 2
+D: 1
+E: 1
+
+=> (Event) Spiel um Platz 5
+D E - D
+[5] E
+
+A: 3
+B: 3
+C: 2
+D: 2
+
+=> (Event) Spiel um Platz 4
+C D - C
+[4] D
+
+A: 3
+B: 3
+C: 3
+
+A B - A
+
+Ausstehend:
+A C
+C B
+
+A: 4
+B: 3
+C: 3
+
+
+<== 1 ==>
+
+A C - A
+
+Ausstehend:
+C B
+
+A: 5
+B: 3
+C: 3
+
+=> (Event) Spiel um Platz 2 (3 wird auch vergeben)
+
+
+
+
+
+
+<== 2 ==> 
+
+
+
+
+
+
+
+
+
+
+
+N: Anzahl zu erreichende Platzierungen
+N': N aufgerundet auf nächste Zweier-Potenz, sodass N' = 2^x und N > N'/2
+
+verdoppeltes Vielfaches: x => x, 2x, 4x, 8x, ...
+Die erste Runde muss ein verdoppeltes Vielfaches von N oder N' Teilnehmer haben.
+
+Beispiele:
+
+
+N=5
+N'=8
+
+verdoppelte Vielfache:
+5, (1 Runde) lvl1
+8, 10, (2 Runden) lvl2
+16, 20, (3 Runden) lvl3
+32, 40, (4 Runden) lvl4
+...
+
+X => X-1: (lvl2+)
+
+5: 4  - Zu klein
+8: 7
+10: 9
+16: 15
+20: 19
+32: 31
+40: 39
+
+Neu: 7, 9, 15, 19, 31, 39
+
+=> 5,  (lvl1)
+   7, 8, 9, 10  (lvl2)
+   15, 16, 19, 20  (lvl3)
+   31, 32, 39, 40  (lvl4)
+
+X => X-1: (lvl3+) using new ones from last iteration
+
+15: 14
+19: 18
+31: 30
+39: 38
+
+=> 5,  (lvl1)
+   7, 8, 9, 10  (lvl2)
+   14, 15, 16, 18, 19, 20  (lvl3)
+   30, 31, 32, 38, 39, 40  (lvl4)
+
+
+
+==> Neue Erkenntnis:
+==> Nicht nur N und N', sondern auch alle Zahlen dazwischen!
+---
+
+N=5
+N'=8
+Ns={5,6,7,8}
+
+verdoppelte Vielfache (bis 32):
+5, 10, 20
+6, 12, 24
+7, 14, 28
+8, 16, 32
+
+NOTE: Immer die erste Spalte verdoppelt!
+
+Nächste Iteration.
+Die zweite Spalte umwandeln: X => X-1
+und dann deren verdoppelte Vielfache!
+
+X => X-1:
+10: 9
+12: 11
+14: 13
+16: 15
+
+5, 10, 20
+6, 12, 24
+7, 14, 28
+8, 16, 32
+
+
+
+
+
+
+
+-------------
+
+N=3
+N'=4
+
+verdoppelte Vielfache: 3, 4, 6, 8, 12, 16
+
+Es ist jedoch möglich dass in darauffolgenden Runden Rausschmeißer einschreiten.
+Es dürfen also bei jedem verdoppelten Vielfachen X
+	die verdoppelten Vielfachen von (X-1) vorkommen.
+Dabei muss (X-1) >= N sein.
+
+3: 2  - Zu klein
+4: 3  - Bereits hinzugefügt
+6: 5
+8: 7
+12: 11
+16: 15
+
+Neu: 5, 7, 11, 15
+
+Mit diesen neuen Zahlen:
+=> 3, 4, 5, 6, 7, 8, 11, 12, 15, 16, ...
+
+Verdoppelte Vielfache:
+5: 10, 20, 40, ...
+7: 14, 28, ...
+11: 22, ...
+15: ...
+
+=> 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, ...
+
+Verbotene >= 3 und <= 16:
+=> 9 und 13
+
+Prüfen:
+
+3: => 3
+4: => 4
+5: + Rausschmeißer => 3
+6: => 3
+7: + Rausschmeißer => 4
+8: => 4
+10: => 5
+11: + Rausschmeißer => 6 => 3
+12: => 6 => 3
+14: => 7 + Rausschmeißer => 4
+15: + Rausschmeißer => 16 => 8 => 4
+
+9: + Rausschmeißer => 10 => 5 + Rausschmeißer => 6 => 3
+13: + Rausschmeißer => 14 => 7 + Rausschmeißer => 8 => 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+A
+B
+C
+E
+
+
+
+A B - A
+C E - C
+A C - C
+B E - E
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
