@@ -332,9 +332,7 @@ public final class Commands {
         String adverb = hadState ? "back " : "";
         info(ctx, format("Added %s %sto the tournament.", h(player.getName()), adverb));
 
-        if (currentRound instanceof EliminationRound) {
-            EliminationRound<Player> eliminationRound = (EliminationRound<Player>) currentRound;
-
+        if (currentRound instanceof EliminationRound<Player> eliminationRound) {
             String state = null;
             if (eliminationRound.isEntrantAdvanced(player))
                 state = "advanced";
@@ -398,10 +396,9 @@ public final class Commands {
         }
         catch (NoOpponentException e) {
             Round<Player> currentRound = state.tournament.getCurrentRound();
-            if (!(currentRound instanceof EliminationRound))
+            if (!(currentRound instanceof EliminationRound<Player> eliminationRound))
                 return uncheckedError(ctx, -4);
 
-            EliminationRound<Player> eliminationRound = (EliminationRound<Player>) currentRound;
             Set<Player> entrants = eliminationRound.getPendingEntrants();
 
             String playerName = "?";
@@ -415,8 +412,7 @@ public final class Commands {
         }
         catch (NoMorePairingsException e) {
             Round<Player> currentRound = state.tournament.getCurrentRound();
-            if (currentRound instanceof RoundRobinFinal) {
-                RoundRobinFinal<Player> roundRobinFinal = (RoundRobinFinal<Player>) currentRound;
+            if (currentRound instanceof RoundRobinFinal<Player> roundRobinFinal) {
                 if (roundRobinFinal.isTie()) {
                     warn(ctx, "The round is a tie! Everyone has the same score. " +
                             "Continue to the next round in order to replay the finals.");
@@ -703,12 +699,12 @@ public final class Commands {
     }
 
     private String colorForPlacement(Placement placement) {
-        switch (placement) {
-            case FIRST: return "§a";
-            case SECOND: return "§e";
-            case THIRD: return "§c";
-            default: return "";
-        }
+        return switch (placement) {
+            case FIRST -> "§a";
+            case SECOND -> "§e";
+            case THIRD -> "§c";
+            default -> "";
+        };
     }
 
     private int cInfoWithTopic(CommandContext<FabricClientCommandSource> ctx, InfoType topic) {
@@ -722,9 +718,7 @@ public final class Commands {
         if (topic == InfoType.PARTICIPANTS) {
             // TODO: Differentiation between RoundRobin, Final, SemiFinal, etc.
 
-            if (currentRound instanceof RoundRobinFinal) {
-                RoundRobinFinal<Player> round = (RoundRobinFinal<Player>) currentRound;
-
+            if (currentRound instanceof RoundRobinFinal<Player> round) {
                 String[] placementInfos = new String[3];
                 ArrayList<String> playerInfos = new ArrayList<>();
 
@@ -920,10 +914,9 @@ public final class Commands {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof ConfirmationState))
+            if (!(o instanceof ConfirmationState other))
                 return false;
 
-            ConfirmationState other = (ConfirmationState) o;
             return this.confirmationType == other.confirmationType
                 && Objects.equals(this.input, other.input);
         }
