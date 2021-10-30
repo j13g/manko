@@ -13,7 +13,7 @@
     "sources": "https://github.com/vonas/manko"
   },
 
-  "license": "UNLICENSED",
+  "license": "MIT",
   "icon": "assets/modid/icon.png",
 
   "environment": "*",
