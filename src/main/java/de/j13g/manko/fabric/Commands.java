@@ -148,7 +148,8 @@ public final class Commands {
 
     private enum Event {
 
-        PAIRING;
+        PAIR,
+        WIN;
 
         @Override
         public String toString() {
@@ -433,8 +434,8 @@ public final class Commands {
 
         attention(ctx, format("Next pairing: %s vs. %s.", hu(firstName), hu(secondName)));
 
-        if (state.onEventTemplates.containsKey(Event.PAIRING)) {
-            String chatMessage = state.onEventTemplates.get(Event.PAIRING);
+        if (state.onEventTemplates.containsKey(Event.PAIR)) {
+            String chatMessage = state.onEventTemplates.get(Event.PAIR);
             chatMessage = format(chatMessage, firstName, secondName);
             ctx.getSource().getPlayer().sendChatMessage(chatMessage);
         }
@@ -465,6 +466,11 @@ public final class Commands {
 
         Player opponent = pairing.getOther(player);
         info(ctx, format("%s has won their pairing against %s", hu(player.getName()), hu(opponent.getName())));
+
+        if (state.onEventTemplates.containsKey(Event.WIN)) {
+            String chatMessage = state.onEventTemplates.get(Event.WIN);
+            ctx.getSource().getPlayer().sendChatMessage(chatMessage);
+        }
 
         return 0;
     }
@@ -868,7 +874,7 @@ public final class Commands {
             return 0;
         }
 
-        if (event == Event.PAIRING) {
+        if (event == Event.PAIR) {
             final String PLAYER_TEMPLATE = "%s";
             final int REQUIRED_OCCURRENCES = 2;
 
@@ -877,6 +883,9 @@ public final class Commands {
                 return -1;
             }
 
+            state.onEventTemplates.put(event, template);
+        }
+        else if (event == Event.WIN) {
             state.onEventTemplates.put(event, template);
         }
 
